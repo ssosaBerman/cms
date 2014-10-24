@@ -5,10 +5,11 @@
 	class installer{
 		// connect to DB
 		public function databaseConnect(){
-			$db_host = 'localhost';
-			$db_user = 'root';
+			
+			$db_host 	 = 'localhost';
+			$db_user 	 = 'root';
 			$db_password = 'sjsm123456';
-			$db_name = 'my_db';
+			$db_name 	 = 'my_db';
 			
 			$connection = new mysqli($db_host, $db_user, $db_password, $db_name);
 			// $connection = mysqli_connect($db_host, $db_user, $db_password, $db_name);
@@ -106,7 +107,6 @@
 				
 				return mysqli_error($connection);
 			}*/
-
 		}
 
 		public function read(){

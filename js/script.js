@@ -1,21 +1,33 @@
 var debug0;
 
 $(document).ready(function(){
+
+	// append users to dropdown
+	$.get('/handler/listUsers.php', function (data){
+		
+		var parseArray = JSON.parse(data);
+		
+		$.each(parseArray, function (userIndex, userValue){
+			
+			var option = $('<option/>').attr('value', userValue.ID).text(userValue.username);
+
+			$('.userList').append(option);
+		});
+	});
 	
-	$('.usersTableInstaller').find('form').on('submit', function(e){		
+	$('.usersTableInstaller').find('form').on('submit', function (e){		
 		
 		e.preventDefault();
 		
 		var formObject = $(this);
 		
-		$.post($(this).attr('action'), function(response){
+		$.post($(this).attr('action'), function (response){
 			
 			if (response.indexOf('success') > -1){
 
-				$('.userList').find('option').each(function(index, value){
+				$('.userList').find('option').each(function (userIndex, userValue){
 					
-					console.log()
-					if( $(value).attr('disabled') === undefined ){
+					if( $(userValue).attr('disabled') === undefined ){
 
 						$(this).remove()
 					}
@@ -26,7 +38,7 @@ $(document).ready(function(){
 		});
 	});
 
-	$('.registerUser').find('form').on('submit',function(e){
+	$('.registerUser').find('form').on('submit', function (e){
 		
 		e.preventDefault();
 		
@@ -34,14 +46,12 @@ $(document).ready(function(){
 		
 		var newUserObj = {
 
-			username: formObject.find('.username').val(),
+			username : formObject.find('.username').val(),
 
-			password: formObject.find('.password').val()
+			password : formObject.find('.password').val()
 		}
 
-		$.post($(this).attr('action'), newUserObj, function(response){
-			
-			console.log()
+		$.post($(this).attr('action'), newUserObj, function (response){
 			
 			if ( isNaN(response) ) {
 				
@@ -57,36 +67,25 @@ $(document).ready(function(){
 		});
 	});
 
-	$.get('/handler/listUsers.php', function(data){
-		
-		var parseArray = JSON.parse(data);
-		
-		$.each(parseArray, function(userIndex, userValue){
-			
-			var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
-
-			$('.userList').append(option);
-		});
-	});
-
-	$('.updateUser').find('form').on('submit', function(e){
+	$('.updateUser').find('form').on('submit', function (e){
 		e.preventDefault();
 
 		var formObject = $(this);
 		
 		updateUserObj = {
-			userID:formObject.find('.userList').children('option:selected').val(),
-			newUsername: formObject.find('.newUsername').val(),
-			newPassword: formObject.find('.newPassword').val()
+
+			userID 		: formObject.find('.userList').children('option:selected').val(),
+			newUsername : formObject.find('.newUsername').val(),
+			newPassword : formObject.find('.newPassword').val()
 		};
 
-		$.post($(this).attr('action'), updateUserObj, function(response){
+		$.post($(this).attr('action'), updateUserObj, function (response){
 
 			if ( response.indexOf('success') > -1 ) {
 				
 				var userID = formObject.find('.userList').children('option:selected').attr('value');
 
-				$('.userList').find('option').each(function(){
+				$('.userList').find('option').each(function (){
 
 					if ( $(this).attr('value') == userID ) {
 
@@ -98,22 +97,23 @@ $(document).ready(function(){
 		})
 	})
 
-	$('.deleteUser').find('form').on('submit', function(e){
+	$('.deleteUser').find('form').on('submit', function (e){
 		e.preventDefault();
 
 		var formObject = $(this);
 		
 		deleteUserObj = {
-			deleteID: formObject.find('.userList').children('option:selected').val(),
+			
+			deleteID : formObject.find('.userList').children('option:selected').val(),
 		}
 
-		$.post($(this).attr('action'), deleteUserObj, function(response){
+		$.post($(this).attr('action'), deleteUserObj, function (response){
 			
 			if ( response.indexOf('success') > -1 ) {
 				
 				var userID = formObject.find('.userList').children('option:selected').attr('value')
 				
-				$('.userList').find('option').each(function(){
+				$('.userList').find('option').each(function (){
 
 					if ( $(this).attr('value') == userID ) {
 
