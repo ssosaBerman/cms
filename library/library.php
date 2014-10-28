@@ -3,7 +3,7 @@
 	error_reporting(E_ALL);
 
 	class installer{
-		// connect to DB
+		
 		public function databaseConnect(){
 			
 			$db_host 	 = 'localhost';
@@ -12,9 +12,6 @@
 			$db_name 	 = 'my_db';
 			
 			$connection = new mysqli($db_host, $db_user, $db_password, $db_name);
-			// $connection = mysqli_connect($db_host, $db_user, $db_password, $db_name);
-
-			// return $connection;
 			
 			if ( $connection->connect_errno ) {
 				
@@ -31,33 +28,26 @@
 		private $password;
 		private $ID;
 
-		// install user table, if problem it will return error
 		public function install(){
 
 			$queryCreateUserTable = "CREATE TABLE users(ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99))";
 			
 			$connection =  $this->databaseConnect();
 
-			if ( $connection->query($queryCreateUserTable) === true ) {
+			$testConnection = $connection->query($queryCreateUserTable);
+
+			if ( $testConnection === true ) {
 				
 				return true;
 			} else {
 
 				return $connection->error;
 			}
-
-			/*if ( mysqli_query($connection, $queryCreateUserTable) ) {
-				
-				return true;
-			} else {
-
-				return mysqli_error($connection);
-			}*/
 		}
 
 		public function uninstall(){
 			
-			$unInstalTable = "DROP TABLE users";
+			$queryUnInstalTable = "DROP TABLE users";
 			
 			$connection = $this->databaseConnect();
 
@@ -68,14 +58,6 @@
 				
 				return $connection->error;
 			}
-
-			/*if( mysqli_query($connection, $uninstaltable) ){
-				
-				return true;
-			} else {
-			
-				return mysqli_error($connection);
-			}*/
 		}
 
 		public function create( $requestedUsername, $requestedPassword ){
@@ -83,8 +65,10 @@
 			$connection = $this->databaseConnect();
 		
 			$queryAddUser = "INSERT INTO users(username, password) VALUES('$requestedUsername', '$requestedPassword');";
-
-			if( $connection->query($queryAddUser) === true ) {
+			
+			$userAdded = $connection->query($queryAddUser);
+			
+			if( $userAdded === true ) {
 
 				$this->ID = $connection->insert_id;
 				$this->username = $requestedUsername;
@@ -95,64 +79,45 @@
 
 				return $connection->error;
 			}
-
-			/*if(mysqli_query($connection, $queryAddUser)){
-				
-				$this->ID = mysqli_insert_id($connection);
-				$this->username = $requestedUsername;
-				$this->password = $requestedPassword;
-				
-				return $this->ID;
-			} else {
-				
-				return mysqli_error($connection);
-			}*/
 		}
 
 		public function read(){
 			
-			$data = array(
+			$userData = array(
 				'username' => $this->username,
 				'password' => $this->password,
 				'ID' => $this->ID,
 			);
 			
-			return $data;
+			return $userData;
 		}
 
-		public function update($findID ,$newName, $newPassword){
+		public function update($userID ,$newName, $newPassword){
 
 			$connection = $this->databaseConnect();
 
-			$queryUpdateUser = "UPDATE `users` SET `username` = '$newName', `password` = '$newPassword' WHERE ID = $findID;";
+			$queryUpdateUser = "UPDATE `users` SET `username` = '$newName', `password` = '$newPassword' WHERE ID = $userID;";
 
-			if ( $connection->query($queryUpdateUser) === true ){
+			$userUpdated = $connection->query($queryUpdateUser);
+
+			if ( $userUpdated === true ){
 
 				return true;
 			} else {
 
 				return $connection->error;
 			}
-
-			/*if ( mysqli_query($connection, $queryUpdateUser) ) {
-				
-				$this->username = $newName;
-				$this->password = $newPassword;
-				
-				return true;
-			} else {
-
-				return mysqli_error($connection);
-			}*/
 		}
 
-		public function destroy($deleteID){
+		public function destroy($userID){
 			
 			$connection = $this->databaseConnect();
 
-			$queryDeleteUser = "DELETE FROM `users` WHERE ID = $deleteID;";
+			$queryDeleteUser = "DELETE FROM `users` WHERE ID = $userID;";
 
-			if ( $connection->query($queryDeleteUser) === true ) {
+			$userDeleted = $connection->query($queryDeleteUser);
+
+			if ( $userDeleted === true ) {
 				
 				unset($this->username);
 				unset($this->password);
@@ -163,18 +128,6 @@
 
 				return $connection->error;
 			}
-
-			/*if (mysqli_query($connection, $queryDeleteUser)) {
-				
-				unset($this->username);
-				unset($this->password);
-				unset($this->ID);
-				
-				return true;
-			} else {
-				
-				return mysqli_error($connection);
-			}*/
 		}
 		
 		public function listRows(){
@@ -191,7 +144,7 @@
 
 				while ($row = $rowList->fetch_array(MYSQLI_ASSOC) ) {
 					
-					array_push($rowArray, $row);
+					$rowArray[] = $row;
 				}
 
 				return $rowArray;
@@ -199,23 +152,6 @@
 
 				return $rowList;	
 			}
-			
-			/*$rowList = mysqli_query($connection, $queryListRows);
-
-			if ( $rowList ) {
-
-				$rowArray = array();
-				
-				while ($row = mysqli_fetch_array($rowList, MYSQLI_ASSOC)) {
-					
-					array_push($rowArray, $row);
-				}
-				
-				return $rowArray;
-			} else {
-
-				return $rowList;
-			}*/
 		}
 	}
 ?>

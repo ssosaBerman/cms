@@ -2,19 +2,20 @@ var debug0;
 
 $(document).ready(function(){
 
-	// append users to dropdown
+	// append users to drop down
 	$.get('/handler/listUsers.php', function (data){
 		
 		var parseArray = JSON.parse(data);
 		
 		$.each(parseArray, function (userIndex, userValue){
 			
-			var option = $('<option/>').attr('value', userValue.ID).text(userValue.username);
+			var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
 
 			$('.userList').append(option);
 		});
 	});
 	
+	// Create or Delete users table
 	$('.usersTableInstaller').find('form').on('submit', function (e){		
 		
 		e.preventDefault();
@@ -27,6 +28,7 @@ $(document).ready(function(){
 
 				$('.userList').find('option').each(function (userIndex, userValue){
 					
+					// Remove all option tag expect default option
 					if( $(userValue).attr('disabled') === undefined ){
 
 						$(this).remove()
@@ -38,6 +40,7 @@ $(document).ready(function(){
 		});
 	});
 
+	// Adds user info to users table
 	$('.registerUser').find('form').on('submit', function (e){
 		
 		e.preventDefault();
@@ -67,6 +70,7 @@ $(document).ready(function(){
 		});
 	});
 
+	// Modify existing user info in users table
 	$('.updateUser').find('form').on('submit', function (e){
 		e.preventDefault();
 
@@ -97,6 +101,7 @@ $(document).ready(function(){
 		})
 	})
 
+	// Deletes selected user from users table
 	$('.deleteUser').find('form').on('submit', function (e){
 		e.preventDefault();
 
