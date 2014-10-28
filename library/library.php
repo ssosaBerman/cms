@@ -3,7 +3,7 @@
 	error_reporting(E_ALL);
 
 	class installer{
-		
+
 		public function databaseConnect(){
 			
 			$db_host 	 = 'localhost';
@@ -34,9 +34,9 @@
 			
 			$connection =  $this->databaseConnect();
 
-			$testConnection = $connection->query($queryCreateUserTable);
+			$tableUsersCreated = $connection->query($queryCreateUserTable);
 
-			if ( $testConnection === true ) {
+			if ( $tableUsersCreated === true ) {
 				
 				return true;
 			} else {
@@ -51,7 +51,9 @@
 			
 			$connection = $this->databaseConnect();
 
-			if ( $connection->query($unInstalTable) === true ) {
+			$tableUsersDeleted = $connection->query($queryUnInstalTable);
+
+			if ( $tableUsersDeleted === true ) {
 				
 				return true;
 			} else {
