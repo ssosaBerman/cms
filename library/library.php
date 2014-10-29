@@ -156,23 +156,21 @@
 			}
 		}
 
-		public function getUser($searchUsername, $searchPassword){
+		public function validateUser($checkUsername, $checkPassword){
 
-			$connection = $this->databaseConnect();
+			$userList = $this->listRows();
 
-			$queryMatchedUser = "SELECT * FROM `users` WHERE `username` = '$searchUsername' AND `password` = '$searchPassword';";
+			$validUser = false;
 
-			$getUserRow = $connection->query($queryMatchedUser);
+			foreach ($userList as $value) {
+				
+				if( $value['username'] == $checkUsername && $value['password'] == $checkPassword ) {
 
-			$userFound = $getUserRow->num_rows;
-
-			if ( $getUserRow ) {
-
-				return $userFound;
-			} else {
-
-				return $connection->error;
+					$validUser = true;
+				}
 			}
+
+			return $validUser;
 		}
 	}
 ?>
