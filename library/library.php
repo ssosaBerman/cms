@@ -143,16 +143,35 @@
 			if( $rowList ) {
 
 				$rowArray = array();
-
+				
 				while ($row = $rowList->fetch_array(MYSQLI_ASSOC) ) {
 					
-					$rowArray[] = $row;
+					$rowArray[] = $row;	
 				}
 
 				return $rowArray;
 			} else {
 
-				return $rowList;	
+				return $rowList;
+			}
+		}
+
+		public function getUser($searchUsername, $searchPassword){
+
+			$connection = $this->databaseConnect();
+
+			$queryMatchedUser = "SELECT * FROM `users` WHERE `username` = '$searchUsername' AND `password` = '$searchPassword';";
+
+			$getUserRow = $connection->query($queryMatchedUser);
+
+			$userFound = $getUserRow->num_rows;
+
+			if ( $getUserRow ) {
+
+				return $userFound;
+			} else {
+
+				return $connection->error;
 			}
 		}
 	}

@@ -130,4 +130,24 @@ $(document).ready(function(){
 			formObject.parents('.deleteUser').find('.feedback').html(response);
 		})
 	})
+
+	// Adds user info to users table
+	$('.loginuser').find('form').on('submit', function (e){
+		
+		e.preventDefault();
+		
+		var formObject = $(this);
+		
+		var userObj = {
+
+			username : formObject.find('.username').val(),
+
+			password : formObject.find('.password').val()
+		}
+
+		$.post($(this).attr('action'), userObj, function (response){
+			
+			formObject.parents('.loginUser').find('.feedback').html(response);
+		});
+	});
 });
