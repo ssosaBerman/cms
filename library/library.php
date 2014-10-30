@@ -22,6 +22,16 @@
 				return $connection;
 			}
 		}
+
+		// escape string for MySql
+		public function requestEscape($escapeString){
+			
+			$connection = $this->databaseConnect();
+
+			$escapedString = $connection->real_escape_string($escapeString);
+
+			return $escapedString;
+		}
 	}
 
 	class user extends installer{
@@ -68,9 +78,12 @@
 		// Create new user with requested username and password, return user ID
 		public function create($requestedUsername, $requestedPassword){
 			
+			$escapedUsername = $this->requestEscape($requestedUsername);
+			$escapedPassword = $this->requestEscape($requestedPassword);
+
 			$connection = $this->databaseConnect();
-		
-			$queryAddUser = "INSERT INTO users(username, password) VALUES('$requestedUsername', '$requestedPassword');";
+
+			$queryAddUser = "INSERT INTO users(username, password) VALUES('$escapedUsername', '$escapedPassword');";
 			
 			$userExist = $this->validateUser(false, $requestedUsername, $requestedPassword);
 
@@ -79,8 +92,8 @@
 			if( $userAdded === true ) {
 
 				$this->ID = $connection->insert_id;
-				$this->username = $requestedUsername;
-				$this->password = $requestedPassword;
+				$this->username = $escapedUsername;
+				$this->password = $escapedPassword;
 
 				return $this->ID;
 			} else {
@@ -102,10 +115,13 @@
 
 		// change user variables and row in DB
 		public function update($userID ,$newName, $newPassword){
+			
+			$escapedUsername = $this->requestEscape($newName);
+			$escapedPassword = $this->requestEscape($newPassword);
 
 			$connection = $this->databaseConnect();
 
-			$queryUpdateUser = "UPDATE `users` SET `username` = '$newName', `password` = '$newPassword' WHERE ID = $userID;";
+			$queryUpdateUser = "UPDATE `users` SET `username` = '$escapedUsername', `password` = '$escapedPassword' WHERE ID = $userID;";
 
 			$userUpdated = $connection->query($queryUpdateUser);
 
