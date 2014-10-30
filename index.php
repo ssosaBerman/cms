@@ -19,7 +19,7 @@
 	</head>
 	<body>
 		<div class="usersTableInstaller">
-			<h2>Install / Uninstall table</h2>
+			<h3>Install / Uninstall table</h3>
 			<form action="/handler/install.php" class="formInstall">
 				<input type="submit" value="Install" />
 			</form>
@@ -29,7 +29,7 @@
 			<div class="feedback"></div>
 		</div>
 		<div class="registerUser">
-			<h2>Register</h2>
+			<h3>Register</h3>
 			<form action="/handler/registerUser.php" class="formRegisterUser">
 				<label for="username">Username</label>
 				<input type="text" name="username" class="username" />
@@ -42,7 +42,7 @@
 			<div class="feedback"></div>
 		</div>
 		<div class="updateUser">
-			<h2>Update</h2>
+			<h3>Update</h3>
 			<form action="/handler/updateUser.php" class="formUpdateUser">
 				
 				<select name="userList" class="userList">
@@ -60,7 +60,7 @@
 			<div class="feedback"></div>
 		</div>
 		<div class="deleteUser">
-			<h2>Delete</h2>
+			<h3>Delete</h3>
 			<form action="/handler/deleteUser.php" class="formDeleteUser">
 				<select name="userList" class="userList">
 					  <option value="noUser" disabled selected>Pick User</option>
@@ -71,7 +71,7 @@
 			<div class="feedback"></div>
 		</div>
 		<div class="loginUser">
-			<h2>Login</h2>
+			<h3>Login</h3>
 			<form action="/handler/validateUser.php" class="formloginUser">
 				<label for="username">Username</label>
 				<input type="text" name="username" class="username" />
