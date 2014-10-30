@@ -7,7 +7,7 @@
 
 	$validateUser = new User();
 
-	$validUser = $validateUser->validateUser($_POST['username'], $_POST['password']);
+	$validUser = $validateUser->validateUser(true, $_POST['username'], $_POST['password']);
 
 	if( $validUser == true ) {
 

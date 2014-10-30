@@ -4,6 +4,7 @@
 
 	class installer{
 
+		// connect to DB
 		public function databaseConnect(){
 			
 			$db_host 	 = 'localhost';
@@ -28,6 +29,7 @@
 		private $password;
 		private $ID;
 
+		// Create table users
 		public function install(){
 
 			$queryCreateUserTable = "CREATE TABLE users(ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99))";
@@ -45,6 +47,7 @@
 			}
 		}
 
+		//Delete user table
 		public function uninstall(){
 			
 			$queryUnInstalTable = "DROP TABLE users";
@@ -62,13 +65,16 @@
 			}
 		}
 
-		public function create( $requestedUsername, $requestedPassword ){
+		// Create new user with requested username and password
+		public function create($requestedUsername, $requestedPassword){
 			
 			$connection = $this->databaseConnect();
 		
 			$queryAddUser = "INSERT INTO users(username, password) VALUES('$requestedUsername', '$requestedPassword');";
 			
-			$userAdded = $connection->query($queryAddUser);
+			$userExist = $this->validateUser(false, $requestedUsername, $requestedPassword);
+
+			$userAdded = ( $userExist == false )? $connection->query($queryAddUser) : false;
 			
 			if( $userAdded === true ) {
 
@@ -156,7 +162,7 @@
 			}
 		}
 
-		public function validateUser($checkUsername, $checkPassword){
+		public function validateUser($validatePassword, $requestedUsername, $requestedPassword){
 
 			$userList = $this->listRows();
 
@@ -164,7 +170,10 @@
 
 			foreach ($userList as $value) {
 				
-				if( $value['username'] == $checkUsername && $value['password'] == $checkPassword ) {
+				if( $value['username'] == $requestedUsername && $value['password'] == $requestedPassword && $validatePassword == true) {
+
+					$validUser = true;
+				}else if ( $value['username'] == $requestedUsername && $validatePassword == false) {
 
 					$validUser = true;
 				}

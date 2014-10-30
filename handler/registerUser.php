@@ -8,6 +8,10 @@
 	$newUser = new User();
 
 	$newUserCreate = $newUser->create($_POST['username'], $_POST['password']);
-	
-	echo $newUserCreate;
+
+	if( $newUserCreate == false ) {
+		echo 'User exist';
+	} else {
+		echo $newUserCreate;
+	}
 ?>
