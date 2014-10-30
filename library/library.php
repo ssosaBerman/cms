@@ -65,7 +65,7 @@
 			}
 		}
 
-		// Create new user with requested username and password
+		// Create new user with requested username and password, return user ID
 		public function create($requestedUsername, $requestedPassword){
 			
 			$connection = $this->databaseConnect();
@@ -88,7 +88,7 @@
 				return $connection->error;
 			}
 		}
-
+		//return array with user information 
 		public function read(){
 			
 			$userData = array(
@@ -100,6 +100,7 @@
 			return $userData;
 		}
 
+		// change user variables and row in DB
 		public function update($userID ,$newName, $newPassword){
 
 			$connection = $this->databaseConnect();
@@ -109,6 +110,9 @@
 			$userUpdated = $connection->query($queryUpdateUser);
 
 			if ( $userUpdated === true ){
+				
+				$this->username = $newName;
+				$this->password = $newPassword;
 
 				return true;
 			} else {
@@ -117,6 +121,7 @@
 			}
 		}
 
+		// unset user variables and remove row from DB
 		public function destroy($userID){
 			
 			$connection = $this->databaseConnect();
@@ -138,6 +143,7 @@
 			}
 		}
 		
+		// returns array of users in users tables
 		public function listRows(){
 			
 			$connection = $this->databaseConnect();
@@ -162,6 +168,13 @@
 			}
 		}
 
+		/**
+		 * [Check if user exist]
+		 * @param  [boolean]	$validatePassword  [validate password]
+		 * @param  [string]		$requestedUsername [username to check for]
+		 * @param  [string] 	$requestedPassword [password to check for]
+		 * @return [boolean]
+		 */
 		public function validateUser($validatePassword, $requestedUsername, $requestedPassword){
 
 			$userList = $this->listRows();
@@ -169,13 +182,19 @@
 			$validUser = false;
 
 			foreach ($userList as $value) {
-				
-				if( $value['username'] == $requestedUsername && $value['password'] == $requestedPassword && $validatePassword == true) {
 
-					$validUser = true;
-				}else if ( $value['username'] == $requestedUsername && $validatePassword == false) {
+				if($validatePassword == false){
+					
+					if($value['username'] == $requestedUsername){
 
-					$validUser = true;
+						$validUser = true;
+					}
+				} else {
+					
+					if($value['username'] == $requestedUsername && $value['password'] == $requestedPassword){
+
+						$validUser = true;
+					}
 				}
 			}
 
