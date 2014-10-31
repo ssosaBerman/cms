@@ -42,11 +42,11 @@
 		// Create table users
 		public function install(){
 
-			$queryCreateUserTable = "CREATE TABLE users(ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99))";
-			
 			$connection =  $this->databaseConnect();
 
-			$tableUsersCreated = $connection->query($queryCreateUserTable);
+			$queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99) )");
+
+			$tableUsersCreated = $queryCreateUserTable->execute();
 
 			if ( $tableUsersCreated === true ) {
 				
@@ -59,18 +59,16 @@
 
 		//Delete user table
 		public function uninstall(){
-			
-			$queryUnInstalTable = "DROP TABLE users";
-			
 			$connection = $this->databaseConnect();
-
-			$tableUsersDeleted = $connection->query($queryUnInstalTable);
-
-			if ( $tableUsersDeleted === true ) {
+			
+			$queryUnInstalTable = $connection->prepare("DROP TABLE users;");
+			$tableUsersDeleted = $queryUnInstalTable->execute();
+			
+			if ( $tableUsersDeleted == true) {
 				
 				return true;
-			} else {
-				
+			} else{
+
 				return $connection->error;
 			}
 		}
@@ -78,16 +76,16 @@
 		// Create new user with requested username and password, return user ID
 		public function create($requestedUsername, $requestedPassword){
 			
+			$connection = $this->databaseConnect();
+
+			$queryAddUser = $connection->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+			$queryAddUser->bind_param('ss', $escapedUsername, $escapedPassword);
+
 			$escapedUsername = $this->requestEscape($requestedUsername);
 			$escapedPassword = $this->requestEscape($requestedPassword);
 
-			$connection = $this->databaseConnect();
-
-			$queryAddUser = "INSERT INTO users(username, password) VALUES('$escapedUsername', '$escapedPassword');";
-			
 			$userExist = $this->validateUser(false, $requestedUsername, $requestedPassword);
-
-			$userAdded = ( $userExist == false )? $connection->query($queryAddUser) : false;
+			$userAdded = ( $userExist == false )? $queryAddUser->execute() : false;
 			
 			if( $userAdded === true ) {
 
@@ -101,6 +99,7 @@
 				return $connection->error;
 			}
 		}
+
 		//return array with user information 
 		public function read(){
 			
@@ -115,16 +114,16 @@
 
 		// change user variables and row in DB
 		public function update($userID ,$newName, $newPassword){
-			
-			$escapedUsername = $this->requestEscape($newName);
-			$escapedPassword = $this->requestEscape($newPassword);
 
 			$connection = $this->databaseConnect();
 
-			$queryUpdateUser = "UPDATE `users` SET `username` = '$escapedUsername', `password` = '$escapedPassword' WHERE ID = $userID;";
+			$queryUpdateUser = $connection->prepare("UPDATE `users` SET `username` = ?, `password` = ? WHERE ID = ?");
+			$queryUpdateUser->bind_param('ssi', $escapedUsername, $escapedPassword, $userID);
 
-			$userUpdated = $connection->query($queryUpdateUser);
-
+			$escapedUsername = $this->requestEscape($newName);
+			$escapedPassword = $this->requestEscape($newPassword);
+			
+			$userUpdated = $queryUpdateUser->execute();
 			if ( $userUpdated === true ){
 				
 				$this->username = $newName;
@@ -142,10 +141,10 @@
 			
 			$connection = $this->databaseConnect();
 
-			$queryDeleteUser = "DELETE FROM `users` WHERE ID = $userID;";
+			$queryDeleteUser = $connection->prepare("DELETE FROM `users` WHERE ID = ?");
+			$queryDeleteUser->bind_param('i', $userID);
 
-			$userDeleted = $connection->query($queryDeleteUser);
-
+			$userDeleted = $queryDeleteUser->execute();
 			if ( $userDeleted === true ) {
 				
 				unset($this->username);
@@ -164,17 +163,24 @@
 			
 			$connection = $this->databaseConnect();
 
-			$queryListRows = "SELECT * FROM users;";
-
-			$rowList = $connection->query($queryListRows);
+			$queryListRows = $connection->prepare("SELECT * FROM users");
 			
+			$rowList = $queryListRows->execute();
 			if( $rowList ) {
+
+				$queryListRows->bind_result($ID, $username, $password);
 
 				$rowArray = array();
 				
-				while ($row = $rowList->fetch_array(MYSQLI_ASSOC) ) {
+				while ($queryListRows->fetch() ) {
 					
-					$rowArray[] = $row;	
+					$rowFields = array(
+						'ID'       => $ID,
+						'username' => $username,
+						'password' => $password,
+						);
+					
+					$rowArray[] = $rowFields;
 				}
 
 				return $rowArray;
@@ -196,7 +202,6 @@
 			$userList = $this->listRows();
 
 			$validUser = false;
-
 			foreach ($userList as $value) {
 
 				if($validatePassword == false){
