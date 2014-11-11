@@ -9,11 +9,5 @@
 
 	$newUserCreate = $newUser->create($_POST['username'], $_POST['password']);
 
-	if( $newUserCreate == false ) {
-
-		echo 'User exist';
-	} else {
-
-		echo $newUserCreate;
-	}
+	echo json_encode($newUserCreate);
 ?>

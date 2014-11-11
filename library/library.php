@@ -2,6 +2,27 @@
 	ini_set('display_errors', 1);
 	error_reporting(E_ALL);
 
+	include_once 'gump/gump.php';
+
+	class validator extends GUMP{
+		public function validate_alpha_numeric_test($field, $input, $param = NULL) {
+			
+			if( !isset($input[$field]) || empty($input[$field]) ) {
+				return;
+			}
+
+			if( !preg_match("/^([a-z0-9ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ])+$/i", $input[$field]) !== FALSE ){
+				
+				return array(
+					'field' => $field,
+					'value' => $input[$field],
+					'rule'  => __FUNCTION__,
+					'param' => $param
+				);
+			}
+		}
+	}
+
 	class installer{
 
 		// connect to DB
@@ -84,19 +105,25 @@
 			$escapedUsername = $this->requestEscape($requestedUsername);
 			$escapedPassword = $this->requestEscape($requestedPassword);
 
-			$userExist = $this->validateUser(false, $requestedUsername, $requestedPassword);
-			$userAdded = ( $userExist == false )? $queryAddUser->execute() : false;
+			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
-			if( $userAdded === true ) {
+			if( $userCreateError == false || is_array($userCreateError) == false) {
 
-				$this->ID = $connection->insert_id;
-				$this->username = $escapedUsername;
-				$this->password = $escapedPassword;
+				
+				if ( $queryAddUser->execute() ) {
 
-				return $this->ID;
+					$this->ID = $connection->insert_id;
+					$this->username = $escapedUsername;
+					$this->password = $escapedPassword;
+
+					return $this->ID;
+				} else {
+
+					return $connection->error;
+				}
 			} else {
 
-				return $connection->error;
+				return $userCreateError;
 			}
 		}
 
@@ -198,28 +225,48 @@
 		 * @return [boolean]
 		 */
 		public function validateUser($validatePassword, $requestedUsername, $requestedPassword){
+				
+			$validateData = array(
+				'username' => $requestedUsername, 
+				'password' => $requestedPassword,
+			);
+			
+			$validateRules = array(
+				'username' => 'required|valid_email|min_len,1',
+				'password' => 'alpha_numeric_test|max_len,100|min_len,6',
+			);
+			
+			$validator =  new validator();
 
-			$userList = $this->listRows();
+			$validated = $validator->validate($validateData, $validateRules);
 
-			$validUser = false;
-			foreach ($userList as $value) {
+			if( $validated === true ) {
 
-				if($validatePassword == false){
-					
-					if($value['username'] == $requestedUsername){
+				$userList = $this->listRows();
 
-						$validUser = true;
-					}
-				} else {
-					
-					if($value['username'] == $requestedUsername && $value['password'] == $requestedPassword){
+				$validUser = false;
+				foreach ($userList as $value) {
 
-						$validUser = true;
+					if($validatePassword == false){
+						
+						if($value['username'] == $requestedUsername){
+
+							$validUser = true;
+						}
+					} else {
+						
+						if($value['username'] == $requestedUsername && $value['password'] == $requestedPassword){
+
+							$validUser = true;
+						}
 					}
 				}
-			}
 
-			return $validUser;
+				return $validUser;
+			} else {
+
+				return $validated; //return error array
+			}
 		}
 	}
 ?>

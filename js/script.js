@@ -55,10 +55,17 @@ $(document).ready(function(){
 		}
 
 		$.post($(this).attr('action'), newUserObj, function (response){
-			
+			// console.log( )
 			if ( isNaN(response) ) {
 				
-				formObject.parents('.registerUser').find('.feedback').html(response);
+				var parseResponse = '';
+				
+				$.each($.parseJSON(response), function(index, value){
+
+					parseResponse += value+'<br/>';
+				})
+				
+				formObject.parents('.registerUser').find('.feedback').html(parseResponse);
 			}else{
 
 				formObject.parents('.registerUser').find('.feedback').html('sucess');
