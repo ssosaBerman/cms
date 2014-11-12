@@ -448,7 +448,7 @@ class GUMP
                     $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha-numeric characters";
                     break;
                 case 'validate_alpha_numeric_test':
-                    $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha-numeric characters";
+                    $resp[] = "The <span class=\"$field_class\">$field</span> field must contain alpha-numeric characters";
                     break;
                 case 'validate_alpha_dash':
                     $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha characters &amp; dashes";
@@ -1048,8 +1048,8 @@ class GUMP
             return;
         }
 
-        if(!preg_match("/^([a-z0-9ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ])+$/i", $input[$field]) !== FALSE)
-        {
+        // if ( !preg_match("/^([a-zÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ])+$/i", $input[$field]) !== FALSE && !preg_match('/^[0-9]+$/', $input[$field]) !== FALSE ) {
+        if ( !preg_match('([a-zA-Z].*[0-9]|[0-9].*[a-zA-Z])', $input[$field]) ) {
             return array(
                 'field' => $field,
                 'value' => $input[$field],

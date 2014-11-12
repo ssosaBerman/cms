@@ -58,16 +58,10 @@ $(document).ready(function(){
 
 			if ( isNaN(response) ) {// error registering
 				
-				var parseResponse = '';
-				
-				$.each($.parseJSON(response), function(index, value){
+				var parseResponse = $.parseJSON(response);
 
-					parseResponse += value+'<br/>';
-				})
-				// console.log(response)
-				formObject.parents('.registerUser').find('.feedback').html(parseResponse);
-
-			}else{ //
+				formObject.parents('.registerUser').find('.feedback').html(objectToText(parseResponse));
+			}else{ //successful register
 				formObject.parents('.registerUser').find('.feedback').html('sucess');
 
 				var option = $('<option/>').attr('value', response).html(newUserObj.username);
@@ -158,3 +152,8 @@ $(document).ready(function(){
 		});
 	});
 });
+
+function objectToText (theObject) {
+
+	return "<pre>" + JSON.stringify(theObject, null, 4) + "</pre>";
+}
