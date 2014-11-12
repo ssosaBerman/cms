@@ -447,6 +447,9 @@ class GUMP
                 case 'validate_alpha_numeric':
                     $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha-numeric characters";
                     break;
+                case 'validate_alpha_numeric_test':
+                    $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha-numeric characters";
+                    break;
                 case 'validate_alpha_dash':
                     $resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha characters &amp; dashes";
                     break;
@@ -1021,6 +1024,24 @@ class GUMP
      * @return mixed
      */
     protected function validate_alpha_numeric($field, $input, $param = NULL)
+    {
+        if(!isset($input[$field]) || empty($input[$field]))
+        {
+            return;
+        }
+
+        if(!preg_match("/^([a-z0-9ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ])+$/i", $input[$field]) !== FALSE)
+        {
+            return array(
+                'field' => $field,
+                'value' => $input[$field],
+                'rule'  => __FUNCTION__,
+                'param' => $param
+            );
+        }
+    }
+
+      protected function validate_alpha_numeric_test($field, $input, $param = NULL)
     {
         if(!isset($input[$field]) || empty($input[$field]))
         {

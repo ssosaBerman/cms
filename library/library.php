@@ -4,25 +4,6 @@
 
 	include_once 'gump/gump.php';
 
-	class validator extends GUMP{
-		public function validate_alpha_numeric_test($field, $input, $param = NULL) {
-			
-			if( !isset($input[$field]) || empty($input[$field]) ) {
-				return;
-			}
-
-			if( !preg_match("/^([a-z0-9ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ])+$/i", $input[$field]) !== FALSE ){
-				
-				return array(
-					'field' => $field,
-					'value' => $input[$field],
-					'rule'  => __FUNCTION__,
-					'param' => $param
-				);
-			}
-		}
-	}
-
 	class installer{
 
 		// connect to DB
@@ -108,7 +89,6 @@
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
 			if( $userCreateError == false || is_array($userCreateError) == false) {
-
 				
 				if ( $queryAddUser->execute() ) {
 
@@ -232,15 +212,13 @@
 			);
 			
 			$validateRules = array(
-				'username' => 'required|valid_email|min_len,1',
-				'password' => 'alpha_numeric_test|max_len,100|min_len,6',
+				'username' => 'required|valid_email',
+				'password' => 'required|alpha_numeric_test|max_len,100|min_len,6',
 			);
+
+			$isValid = GUMP::is_valid($validateData, $validateRules);
 			
-			$validator =  new validator();
-
-			$validated = $validator->validate($validateData, $validateRules);
-
-			if( $validated === true ) {
+			if ( $isValid === true ) {
 
 				$userList = $this->listRows();
 
@@ -249,23 +227,23 @@
 
 					if($validatePassword == false){
 						
-						if($value['username'] == $requestedUsername){
+						if ( $value['username'] == $requestedUsername ) {
 
 							$validUser = true;
 						}
 					} else {
 						
-						if($value['username'] == $requestedUsername && $value['password'] == $requestedPassword){
+						if ( $value['username'] == $requestedUsername && $value['password'] == $requestedPassword ) {
 
 							$validUser = true;
 						}
 					}
 				}
-
-				return $validUser;
+				// return true if provided user and/or password match else return false
+				return $validUser; 
 			} else {
 
-				return $validated; //return error array
+				return $isValid; //return error array
 			}
 		}
 	}

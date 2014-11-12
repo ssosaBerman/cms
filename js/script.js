@@ -1,5 +1,5 @@
 var debug0;
-
+// console.log()
 $(document).ready(function(){
 
 	// append users to drop down
@@ -55,8 +55,8 @@ $(document).ready(function(){
 		}
 
 		$.post($(this).attr('action'), newUserObj, function (response){
-			// console.log( )
-			if ( isNaN(response) ) {
+
+			if ( isNaN(response) ) {// error registering
 				
 				var parseResponse = '';
 				
@@ -64,10 +64,10 @@ $(document).ready(function(){
 
 					parseResponse += value+'<br/>';
 				})
-				
+				// console.log(response)
 				formObject.parents('.registerUser').find('.feedback').html(parseResponse);
-			}else{
 
+			}else{ //
 				formObject.parents('.registerUser').find('.feedback').html('sucess');
 
 				var option = $('<option/>').attr('value', response).html(newUserObj.username);
