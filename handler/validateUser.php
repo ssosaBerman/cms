@@ -9,9 +9,12 @@
 
 	$validUser = $validateUser->validateUser(true, $_POST['username'], $_POST['password']);
 
-	if( $validUser == true ) {
+	if( is_array($validUser) == false ) {
+		$debug = ($validUser)? 'true' : 'false';
+		// echo 'OK';
+		echo $debug;
 
-		echo 'OK';
+		// echo is_array($validUser);
 	} else {
 
 		echo 'Not found';

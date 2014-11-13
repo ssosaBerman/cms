@@ -59,6 +59,7 @@ $(document).ready(function(){
 			if ( isNaN(response) ) {// error registering
 				
 				var parseResponse = $.parseJSON(response);
+				
 
 				formObject.parents('.registerUser').find('.feedback').html(objectToText(parseResponse));
 			}else{ //successful register
