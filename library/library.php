@@ -213,7 +213,7 @@
 			
 			$validateRules = array(
 				'username' => 'required|valid_email',
-				'password' => 'required|alpha_numeric_test|max_len,100|min_len,6',
+				'password' => 'required|alpha_and_numeric|max_len,100|min_len,6',
 			);
 
 			$isValid = GUMP::is_valid($validateData, $validateRules);

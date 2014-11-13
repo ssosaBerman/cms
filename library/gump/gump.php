@@ -447,7 +447,7 @@ class GUMP
 				case 'validate_alpha_numeric':
 				$resp[] = "The <span class=\"$field_class\">$field</span> field may only contain alpha-numeric characters";
 				break;
-				case 'validate_alpha_numeric_test':
+				case 'validate_alpha_and_numeric':
 				$resp[] = "The <span class=\"$field_class\">$field</span> field must have both numbers and alphabetical characters";
 				break;
 				case 'validate_alpha_dash':
@@ -1040,7 +1040,7 @@ class GUMP
 		}
 	}
 
-	protected function validate_alpha_numeric_test($field, $input, $param = NULL) {
+	protected function validate_alpha_and_numeric($field, $input, $param = NULL) {
 
 		if(!isset($input[$field]) || empty($input[$field])) {
 			return;
