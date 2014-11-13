@@ -46,7 +46,7 @@
 			<form action="/handler/updateUser.php" class="formUpdateUser">
 				
 				<select name="userList" class="userList">
-					  <option value="noUser" disabled selected>Pick User</option>
+					  <option value="" disabled selected>Pick User</option>
 				</select>
 				
 				<label for="username">New username</label>
@@ -63,7 +63,7 @@
 			<h3>Delete</h3>
 			<form action="/handler/deleteUser.php" class="formDeleteUser">
 				<select name="userList" class="userList">
-					  <option value="noUser" disabled selected>Pick User</option>
+					  <option value="" disabled selected>Pick User</option>
 				</select>
 				
 				<input type="submit" value="Delete" />

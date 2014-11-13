@@ -78,6 +78,11 @@ $(document).ready(function(){
 
 		var formObject = $(this);
 		
+		if ( formObject.find('.userList').children('option:selected').val() == '') {
+
+			return false;
+		}
+
 		updateUserObj = {
 
 			userID 		: formObject.find('.userList').children('option:selected').val(),
@@ -109,6 +114,11 @@ $(document).ready(function(){
 
 		var formObject = $(this);
 		
+		if ( formObject.find('.userList').children('option:selected').val() == '') {
+
+			return false;
+		};
+
 		deleteUserObj = {
 			
 			deleteID : formObject.find('.userList').children('option:selected').val(),
