@@ -6,9 +6,14 @@
 <html>
 	<head>
 	<style>
+		*{
+			font-family: Arial, Helvetica, Sans-Serif;
+		}
+
 		input, select{
 			display: block;
 		}
+
 		div{
 			border: 1px solid #000;
 			margin-bottom: 5px;
