@@ -88,7 +88,7 @@
 
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
-			if( $userCreateError == false || is_array($userCreateError) == false) {
+			if( $userCreateError == false && is_array($userCreateError) == false ) {
 				
 				if ( $queryAddUser->execute() ) {
 
@@ -103,7 +103,7 @@
 				}
 			} else {
 
-				return $userCreateError;
+				return $userCreateError; //error array or true
 			}
 		}
 
@@ -223,9 +223,9 @@
 				$userList = $this->listRows();
 
 				$validUser = false;
-				foreach ($userList as $value) {
+				foreach ( $userList as $value ) {
 
-					if($validatePassword == false){
+					if ( $validatePassword == false ) {
 						
 						if ( $value['username'] == $requestedUsername ) {
 

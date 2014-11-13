@@ -56,13 +56,13 @@ $(document).ready(function(){
 
 		$.post($(this).attr('action'), newUserObj, function (response){
 
-			if ( isNaN(response) ) {// error registering
+			if ( isNaN(response) ) {// registration fail
 				
 				var parseResponse = $.parseJSON(response);
 				
-
 				formObject.parents('.registerUser').find('.feedback').html(objectToText(parseResponse));
-			}else{ //successful register
+			}else{ //registration successful 
+				
 				formObject.parents('.registerUser').find('.feedback').html('sucess');
 
 				var option = $('<option/>').attr('value', response).html(newUserObj.username);
