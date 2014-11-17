@@ -85,7 +85,7 @@
 
 			$escapedUsername = $this->requestEscape($requestedUsername);
 			$escapedPassword = $this->requestEscape($requestedPassword);
-
+			
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
 			if( $userCreateError == false && is_array($userCreateError) == false ) {
