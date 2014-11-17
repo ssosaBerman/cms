@@ -102,8 +102,7 @@
 		function gensalt_private($input)
 		{
 			$output = '$P$';
-			$output .= $this->itoa64[min($this->iteration_count_log2 +
-				((PHP_VERSION >= '5') ? 5 : 3), 30)];
+			$output .= $this->itoa64[min($this->iteration_count_log2 + ( (PHP_VERSION >= '5') ? 5 : 3 ), 30) ];
 			$output .= $this->encode64($input, 6);
 
 			return $output;
@@ -215,7 +214,7 @@
 
 		function HashPassword($password)
 		{
-			$random = '';
+			$random = '27Y|9750X I<c?CV>p#E~wUDK,2+CZJWia3o!VlgLS-N#fjtbg+LBa-1W}%2pv{v';//leave empty to generate random salt
 
 			if (CRYPT_BLOWFISH == 1 && !$this->portable_hashes) {
 				$random = $this->get_random_bytes(16);
@@ -238,12 +237,7 @@
 				$random = $this->get_random_bytes(6);
 
 			$hash = 
-			$this->crypt_private(
-				$password, 
-				'$P$BNqdL1 ; '
-				// '$P$BNqdL1n16'
-				/*$this->gensalt_private($random)*/
-				);
+			$this->crypt_private($password, $this->gensalt_private($random) );
 			if (strlen($hash) == 34)
 				return $hash;
 
