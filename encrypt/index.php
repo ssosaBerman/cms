@@ -32,10 +32,8 @@ include 'passwordClass.php';
 		<input type="submit">
 	</form>
 	<br />
-	<br />
 	<div class="test">
-		<?php print_r( makePassword() ); ?>	
-		
+		<?php print_r( makePassword() ); ?>
 	</div>
 	<div class="feedback"></div>
 </body>

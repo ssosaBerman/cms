@@ -7,7 +7,7 @@
 		// Base-2 logarithm of the iteration count used for password stretching
 		$hash_cost_log2 = 8;
 		// Do we require the hashes to be portable to older systems (less secure)?
-		$hash_portable = FALSE;
+		$hash_portable = TRUE;
 
 		$hasher = new PasswordHash($hash_cost_log2, $hash_portable);
 		
@@ -27,6 +27,7 @@
 			//return matched hash
 			return $hashCheck;
 		}
+
 		// return new hash
 		return $hash;
 	}
@@ -235,9 +236,14 @@
 
 			if (strlen($random) < 6)
 				$random = $this->get_random_bytes(6);
-			$hash =
-			    $this->crypt_private($password,
-			    $this->gensalt_private($random));
+
+			$hash = 
+			$this->crypt_private(
+				$password, 
+				'$P$BNqdL1 ; '
+				// '$P$BNqdL1n16'
+				/*$this->gensalt_private($random)*/
+				);
 			if (strlen($hash) == 34)
 				return $hash;
 
