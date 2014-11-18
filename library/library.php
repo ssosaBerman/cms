@@ -3,6 +3,7 @@
 	error_reporting(E_ALL);
 
 	include_once 'gump/gump.php';
+	include_once 'phpass/phpass.php';
 
 	class installer{
 
@@ -26,9 +27,12 @@
 		}
 
 		// escape string for MySql
-		public function requestEscape($escapeString){
+		public function requestEscape($escapeString, $connection = '') {
 			
-			$connection = $this->databaseConnect();
+			if( $connection == '' ) {
+
+				$connection = $this->databaseConnect();	
+			}
 
 			$escapedString = $connection->real_escape_string($escapeString);
 
@@ -81,10 +85,10 @@
 			$connection = $this->databaseConnect();
 
 			$queryAddUser = $connection->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-			$queryAddUser->bind_param('ss', $escapedUsername, $escapedPassword);
+			$queryAddUser->bind_param('ss', $escapedUsername, $hashPassword);
 
-			$escapedUsername = $this->requestEscape($requestedUsername);
-			$escapedPassword = $this->requestEscape($requestedPassword);
+			$escapedUsername = $this->requestEscape($requestedUsername, $connection);
+			$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword, $connection) );
 			
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
@@ -94,7 +98,7 @@
 
 					$this->ID = $connection->insert_id;
 					$this->username = $escapedUsername;
-					$this->password = $escapedPassword;
+					$this->password = $requestedPassword;
 
 					return $this->ID;
 				} else {
@@ -121,16 +125,17 @@
 
 		// change user variables and row in DB
 		public function update($userID ,$newName, $newPassword){
-
+			
 			$connection = $this->databaseConnect();
 
 			$queryUpdateUser = $connection->prepare("UPDATE `users` SET `username` = ?, `password` = ? WHERE ID = ?");
-			$queryUpdateUser->bind_param('ssi', $escapedUsername, $escapedPassword, $userID);
+			$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
 
-			$escapedUsername = $this->requestEscape($newName);
-			$escapedPassword = $this->requestEscape($newPassword);
+			$escapedUsername = $this->requestEscape($newName, $connection);
+			$hashPassword = $this->makePassword( $this->requestEscape($newPassword, $connection) );
 			
 			$userUpdated = $queryUpdateUser->execute();
+
 			if ( $userUpdated === true ){
 				
 				$this->username = $newName;
@@ -204,22 +209,27 @@
 		 * @param  [string] 	$requestedPassword [password to check for]
 		 * @return [boolean]
 		 */
-		public function validateUser($validatePassword, $requestedUsername, $requestedPassword){
+		public function validateUser($validatePassword, $requestedUsername, $requestedPassword = ''){
 				
 			$validateData = array(
 				'username' => $requestedUsername, 
 				'password' => $requestedPassword,
 			);
 			
-			$validateRules = array(
-				'username' => 'required|valid_email',
-				'password' => 'required|alpha_and_numeric|max_len,100|min_len,6',
-			);
+			$validateRules = array();
+			$validateRules['username'] = 'required|valid_email';
+			
+			if ( $validatePassword === true ) {
+				
+				$validateRules['password'] = 'required|alpha_and_numeric|max_len,100|min_len,6';
+			}
 
 			$isValid = GUMP::is_valid($validateData, $validateRules);
 			
 			if ( $isValid === true ) {
 
+				$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
+				
 				$userList = $this->listRows();
 
 				$validUser = false;
@@ -233,7 +243,7 @@
 						}
 					} else {
 						
-						if ( $value['username'] == $requestedUsername && $value['password'] == $requestedPassword ) {
+						if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword ) {
 
 							$validUser = true;
 						}
@@ -245,6 +255,20 @@
 
 				return $isValid; //return error array
 			}
+		}
+
+		private function makePassword($passwordRequest) {
+
+			// Base-2 logarithm of the iteration count used for password stretching
+			$hash_cost_log2 = 8;
+			// Do we require the hashes to be portable to older systems (less secure)?
+			$hash_portable = TRUE;
+
+			$hasher = new PasswordHash($hash_cost_log2, $hash_portable);
+
+			$hash = $hasher->HashPassword($passwordRequest);
+
+			return $hash;
 		}
 	}
 ?>

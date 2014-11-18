@@ -9,9 +9,9 @@
 	
 	$updateUserUpdater = $updateUser->update($_POST['userID'], $_POST['newUsername'], $_POST['newPassword']);
 	
-	if ( $updateUserUpdater !== true ) {
+	if ( $updateUserUpdater !== true || is_array($updateUserUpdater) == true ) {
 		
-		echo $updateUserUpdater;
+		print_r($updateUserUpdater);
 	} else {
 
 		echo "success";

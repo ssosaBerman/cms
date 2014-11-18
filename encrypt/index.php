@@ -15,10 +15,9 @@ include 'passwordClass.php';
 
 		$('.passwordForm').on('submit', function(e){
 			e.preventDefault();
-			hashVal = $('.test').text().trim();
 			passwordVal = $(this).find('.password').val()
 			
-			$.post('encrypt.php', { password: passwordVal, hash: hashVal}, function(response){			
+			$.post('encrypt.php', { password: passwordVal }, function(response){			
 				$('.feedback').html(response)
 			})
 		})

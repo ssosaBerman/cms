@@ -2,20 +2,6 @@
 	ini_set('display_errors', 1);
 	error_reporting(E_ALL);
 
-	function makePassword($passwordRequest = 'test') {
-		
-		// Base-2 logarithm of the iteration count used for password stretching
-		$hash_cost_log2 = 8;
-		// Do we require the hashes to be portable to older systems (less secure)?
-		$hash_portable = TRUE;
-
-		$hasher = new PasswordHash($hash_cost_log2, $hash_portable);
-
-		$hash = $hasher->HashPassword($passwordRequest);
-
-		return $hash;
-	}
-
 	class PasswordHash {
 		var $itoa64;
 		var $iteration_count_log2;
