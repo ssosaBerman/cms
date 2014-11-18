@@ -86,7 +86,7 @@ $(document).ready(function(){
 		updateUserObj = {
 
 			userID 		: formObject.find('.userList').children('option:selected').val(),
-			newUsername : formObject.find('.newUsername').val(),
+			newUsername : ( formObject.find('.newUsername').val().length == 0 ) ? formObject.find('.userList').children('option:selected').text() : formObject.find('.newUsername').val(),
 			newPassword : formObject.find('.newPassword').val()
 		};
 
