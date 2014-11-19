@@ -70,7 +70,6 @@
 			$connection = $this->databaseConnect();
 
 			if ( $queryUnInstalTable = $connection->prepare("DROP TABLE users;") ) {
-
 				$tableUsersDeleted = $queryUnInstalTable->execute();
 
 				if ( $tableUsersDeleted == true) {
@@ -100,16 +99,15 @@
 
 					if ( $queryAddUser->execute() ) {
 
-						$this->ID = $connection->insert_id;
+						$this->ID       = $connection->insert_id;
 						$this->username = $escapedUsername;
 						$this->password = $requestedPassword;
 
 						return $this->ID;
-					} else {
-
-						return $connection->error;
 					}
 				}
+
+				return $connection->error;
 			}
 
 			return $userCreateError; 
@@ -141,11 +139,10 @@
 					$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
 					
 					$escapedUsername = $this->requestEscape($newName, $connection);
-					$hashPassword = $this->makePassword( $this->requestEscape($newPassword, $connection) );
+					$hashPassword    = $this->makePassword( $this->requestEscape($newPassword, $connection) );
 					
-					$userUpdated = $queryUpdateUser->execute();
-
-					if ( $userUpdated === true ){
+					
+					if ( $userUpdated = $queryUpdateUser->execute() ){
 						
 						$this->username = $newName;
 						$this->password = $newPassword;
@@ -169,22 +166,17 @@
 			if ( $queryDeleteUser = $connection->prepare("DELETE FROM `users` WHERE ID = ?") ) {
 				$queryDeleteUser->bind_param('i', $userID);
 
-				$userDeleted = $queryDeleteUser->execute();
-				if ( $userDeleted === true ) {
+				if ( $userDeleted = $queryDeleteUser->execute() ) {
 					
 					unset($this->username);
 					unset($this->password);
 					unset($this->ID);
 					
 					return true;
-				} else {
-
-					return $connection->error;
 				}
-			} else {
-				
-				return $connection->error;
 			}
+				
+			return $connection->error;
 		}
 		
 		// returns array of users in users tables
@@ -194,14 +186,13 @@
 
 			if ( $queryListRows = $connection->prepare("SELECT * FROM users") ) {
 				
-				$rowList = $queryListRows->execute();
-				if ( $rowList ) {
+				if ( $rowList = $queryListRows->execute() ) {
 
 					$queryListRows->bind_result($ID, $username, $password);
 
 					$rowArray = array();
 					
-					while ($queryListRows->fetch() ) {
+					while ( $queryListRows->fetch() ) {
 						
 						$rowFields = array(
 							'ID'       => $ID,
@@ -213,14 +204,12 @@
 					}
 
 					return $rowArray;
-				} else {
+				} 
 
-					return $rowList;
-				}
-			} else {
-				
-				return $connection->error;
+				return $rowList;
 			}
+
+			return $connection->error;
 		}
 
 		/**
@@ -236,18 +225,14 @@
 				'password' => $requestedPassword,
 			);
 			
-			$validateRules = array();
-
-			$validateRules['username'] = 'required|valid_email';
+			$validateRules = array( 'username' => 'required|valid_email' );
 			
 			if ( $validatePassword == '' || $validatePassword == true ) {
 				
 				$validateRules['password'] = 'required|alpha_and_numeric|max_len,100|min_len,6';
 			}
-
-			$isValid = GUMP::is_valid($validateData, $validateRules);
 			
-			if ( $isValid === true ) {
+			if ( $isValid = GUMP::is_valid($validateData, $validateRules) == true ) {
 
 				$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
 				
@@ -259,9 +244,8 @@
 
 					$queryFindUser->bind_param('s', $requestedUsername);
 					
-					$userRetrieved = $queryFindUser->execute();
+					$queryFindUser->execute();
 					$queryFindUser->bind_result($userID);
-						
 					$queryFindUser->fetch();
 				} else {
 
@@ -290,10 +274,10 @@
 				}
 				// return true if provided user and/or password match else return false
 				return $validUser; 
-			} else {
-
-				return $isValid; //return error array
 			}
+
+			//return error array
+			return $isValid; 
 		}
 
 		private function makePassword($passwordRequest) {

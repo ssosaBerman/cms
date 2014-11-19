@@ -9,14 +9,10 @@
 
 	$newUserCreate = $newUser->create($_POST['username'], $_POST['password']);
 
-	if ( is_array($newUserCreate) ) {
+	if ( is_array($newUserCreate) || is_numeric($newUserCreate) == true ) {
 
 		// return error array
 		echo json_encode($newUserCreate);
-	} elseif ( is_numeric($newUserCreate) == true ) {
-
-		// return new user ID
-		echo $newUserCreate;
 	} else {
 		
 		echo json_encode('User Exist');		

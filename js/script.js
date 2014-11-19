@@ -83,6 +83,7 @@ $(document).ready(function(){
 		
 		if ( formObject.find('.userList').children('option:selected').val() == '') {
 
+			formObject.parents('.updateUser').find('.feedback').html('Pick user');
 			return false;
 		}
 
@@ -107,6 +108,7 @@ $(document).ready(function(){
 					}
 				})
 			}
+			
 			formObject.parents('.updateUser').find('.feedback').html(objectToText(parseResponse));
 		})
 	})
@@ -119,6 +121,7 @@ $(document).ready(function(){
 		
 		if ( formObject.find('.userList').children('option:selected').val() == '') {
 
+			formObject.parents('.deleteUser').find('.feedback').html('Pick user');
 			return false;
 		};
 
