@@ -7,13 +7,13 @@
 
 	$updateUser = new User();
 	
-	$updateUserUpdater = $updateUser->update($_POST['userID'], $_POST['newUsername'], $_POST['newPassword']);
+	$updateUserUpdater = $updateUser->update($_POST['userID'], $_POST['username'], $_POST['password']);
 	
 	if ( $updateUserUpdater !== true ) {
 		
-		echo $updateUserUpdater;
+		echo json_encode($updateUserUpdater);
 	} else {
 
-		echo "success";
+		echo json_encode("success");
 	}	
 ?>

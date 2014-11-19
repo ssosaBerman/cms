@@ -34,9 +34,12 @@
 				$connection = $this->databaseConnect();	
 			}
 
-			$escapedString = $connection->real_escape_string($escapeString);
+			if ( $escapedString = $connection->real_escape_string($escapeString) ) {
+				
+				return $escapedString;
+			}
 
-			return $escapedString;
+			return $connection->error;
 		}
 	}
 
@@ -50,65 +53,66 @@
 
 			$connection =  $this->databaseConnect();
 
-			$queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99) )");
+			if ( $queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99) )") ) {
+				$tableUsersCreated = $queryCreateUserTable->execute();
 
-			$tableUsersCreated = $queryCreateUserTable->execute();
-
-			if ( $tableUsersCreated === true ) {
-				
-				return true;
-			} else {
-
-				return $connection->error;
+				if ( $tableUsersCreated === true ) {
+					
+					return true;
+				}
 			}
+
+			return $connection->error;
 		}
 
 		//Delete user table
 		public function uninstall(){
 			$connection = $this->databaseConnect();
-			
-			$queryUnInstalTable = $connection->prepare("DROP TABLE users;");
-			$tableUsersDeleted = $queryUnInstalTable->execute();
-			
-			if ( $tableUsersDeleted == true) {
-				
-				return true;
-			} else{
 
-				return $connection->error;
+			if ( $queryUnInstalTable = $connection->prepare("DROP TABLE users;") ) {
+
+				$tableUsersDeleted = $queryUnInstalTable->execute();
+
+				if ( $tableUsersDeleted == true) {
+
+					return true;
+				}
 			}
+
+			return $connection->error;
 		}
 
 		// Create new user with requested username and password, return user ID
 		public function create($requestedUsername, $requestedPassword){
 			
-			$connection = $this->databaseConnect();
-
-			$queryAddUser = $connection->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-			$queryAddUser->bind_param('ss', $escapedUsername, $hashPassword);
-
-			$escapedUsername = $this->requestEscape($requestedUsername, $connection);
-			$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword, $connection) );
-			
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 			
-			if( $userCreateError == false && is_array($userCreateError) == false ) {
+			if ( $userCreateError == false && is_array($userCreateError) == false ) {
 				
-				if ( $queryAddUser->execute() ) {
+				$connection = $this->databaseConnect();
 
-					$this->ID = $connection->insert_id;
-					$this->username = $escapedUsername;
-					$this->password = $requestedPassword;
+				if ( $queryAddUser = $connection->prepare("INSERT INTO users (username, password) VALUES (?, ?)") ) {
 
-					return $this->ID;
-				} else {
+					$queryAddUser->bind_param('ss', $escapedUsername, $hashPassword);
 
-					return $connection->error;
+					$escapedUsername = $this->requestEscape($requestedUsername, $connection);
+					$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword, $connection) );
+
+					if ( $queryAddUser->execute() ) {
+
+						$this->ID = $connection->insert_id;
+						$this->username = $escapedUsername;
+						$this->password = $requestedPassword;
+
+						return $this->ID;
+					} else {
+
+						return $connection->error;
+					}
 				}
-			} else {
-
-				return $userCreateError; //error array or true
 			}
+
+			return $userCreateError; 
 		}
 
 		//return array with user information 
@@ -124,27 +128,36 @@
 		}
 
 		// change user variables and row in DB
-		public function update($userID ,$newName, $newPassword){
-			
-			$connection = $this->databaseConnect();
+		public function update($userID, $newName, $newPassword){
 
-			$queryUpdateUser = $connection->prepare("UPDATE `users` SET `username` = ?, `password` = ? WHERE ID = ?");
-			$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
+			$userUpdateError = $this->validateUser(true, $newName, $newPassword);
 
-			$escapedUsername = $this->requestEscape($newName, $connection);
-			$hashPassword = $this->makePassword( $this->requestEscape($newPassword, $connection) );
-			
-			$userUpdated = $queryUpdateUser->execute();
-
-			if ( $userUpdated === true ){
+			if ( is_array($userUpdateError) == false || $userUpdateError == false ) {
 				
-				$this->username = $newName;
-				$this->password = $newPassword;
+				$connection = $this->databaseConnect();
 
-				return true;
-			} else {
+				if ( $queryUpdateUser = $connection->prepare("UPDATE `users` SET `username` = ?, `password` = ? WHERE ID = ?") ) {
+					
+					$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
+					
+					$escapedUsername = $this->requestEscape($newName, $connection);
+					$hashPassword = $this->makePassword( $this->requestEscape($newPassword, $connection) );
+					
+					$userUpdated = $queryUpdateUser->execute();
+
+					if ( $userUpdated === true ){
+						
+						$this->username = $newName;
+						$this->password = $newPassword;
+
+						return true;
+					}
+				}
 
 				return $connection->error;
+			} else {
+
+				return $userUpdateError;
 			}
 		}
 
@@ -153,19 +166,23 @@
 			
 			$connection = $this->databaseConnect();
 
-			$queryDeleteUser = $connection->prepare("DELETE FROM `users` WHERE ID = ?");
-			$queryDeleteUser->bind_param('i', $userID);
+			if ( $queryDeleteUser = $connection->prepare("DELETE FROM `users` WHERE ID = ?") ) {
+				$queryDeleteUser->bind_param('i', $userID);
 
-			$userDeleted = $queryDeleteUser->execute();
-			if ( $userDeleted === true ) {
-				
-				unset($this->username);
-				unset($this->password);
-				unset($this->ID);
-				
-				return true;
+				$userDeleted = $queryDeleteUser->execute();
+				if ( $userDeleted === true ) {
+					
+					unset($this->username);
+					unset($this->password);
+					unset($this->ID);
+					
+					return true;
+				} else {
+
+					return $connection->error;
+				}
 			} else {
-
+				
 				return $connection->error;
 			}
 		}
@@ -175,35 +192,38 @@
 			
 			$connection = $this->databaseConnect();
 
-			$queryListRows = $connection->prepare("SELECT * FROM users");
-			
-			$rowList = $queryListRows->execute();
-			if( $rowList ) {
-
-				$queryListRows->bind_result($ID, $username, $password);
-
-				$rowArray = array();
+			if ( $queryListRows = $connection->prepare("SELECT * FROM users") ) {
 				
-				while ($queryListRows->fetch() ) {
+				$rowList = $queryListRows->execute();
+				if ( $rowList ) {
+
+					$queryListRows->bind_result($ID, $username, $password);
+
+					$rowArray = array();
 					
-					$rowFields = array(
-						'ID'       => $ID,
-						'username' => $username,
-						'password' => $password,
-						);
-					
-					$rowArray[] = $rowFields;
+					while ($queryListRows->fetch() ) {
+						
+						$rowFields = array(
+							'ID'       => $ID,
+							'username' => $username,
+							'password' => $password,
+							);
+						
+						$rowArray[] = $rowFields;
+					}
+
+					return $rowArray;
+				} else {
+
+					return $rowList;
 				}
-
-				return $rowArray;
 			} else {
-
-				return $rowList;
+				
+				return $connection->error;
 			}
 		}
 
 		/**
-		 * [Check if user exist]
 		 * @param  [boolean]	$validatePassword  [validate password]
 		 * @param  [string]		$requestedUsername [username to check for]
 		 * @param  [string] 	$requestedPassword [password to check for]
@@ -217,9 +237,10 @@
 			);
 			
 			$validateRules = array();
+
 			$validateRules['username'] = 'required|valid_email';
 			
-			if ( $validatePassword === true ) {
+			if ( $validatePassword == '' || $validatePassword == true ) {
 				
 				$validateRules['password'] = 'required|alpha_and_numeric|max_len,100|min_len,6';
 			}
@@ -232,20 +253,39 @@
 				
 				$userList = $this->listRows();
 
+				$connection = $this->databaseConnect();
+				
+				if ( $queryFindUser = $connection->prepare("SELECT `ID` FROM `users` WHERE `username` = ?") ) {
+
+					$queryFindUser->bind_param('s', $requestedUsername);
+					
+					$userRetrieved = $queryFindUser->execute();
+					$queryFindUser->bind_result($userID);
+						
+					$queryFindUser->fetch();
+				} else {
+
+					return $connection->error;
+				}
+
 				$validUser = false;
-				foreach ( $userList as $value ) {
+				
+				if ( $userID !== null) {
 
-					if ( $validatePassword == false ) {
-						
-						if ( $value['username'] == $requestedUsername ) {
+					foreach ( $userList as $value ) {
 
-							$validUser = true;
-						}
-					} else {
-						
-						if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword ) {
+						if ( $validatePassword == false ) {
 
-							$validUser = true;
+							if ( $value['username'] == $requestedUsername && $value['ID'] == $userID ) {
+
+								$validUser = true;
+							}
+						} else {
+
+							if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword && $value['ID'] == $userID ) {
+
+								$validUser = true;
+							}
 						}
 					}
 				}
@@ -262,7 +302,7 @@
 			// Base-2 logarithm of the iteration count used for password stretching
 			$hash_cost_log2 = 8;
 			// Do we require the hashes to be portable to older systems (less secure)?
-			$hash_portable = TRUE;
+			$hash_portable = true;
 
 			$hasher = new PasswordHash($hash_cost_log2, $hash_portable);
 

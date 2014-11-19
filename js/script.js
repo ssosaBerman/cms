@@ -6,13 +6,16 @@ $(document).ready(function(){
 	$.get('/handler/listUsers.php', function (data){
 		
 		var parseArray = JSON.parse(data);
-		
-		$.each(parseArray, function (userIndex, userValue){
-			
-			var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
 
-			$('.userList').append(option);
-		});
+		if ( typeof parseArray == 'object') {
+
+			$.each(parseArray, function (userIndex, userValue){
+				
+				var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
+
+				$('.userList').append(option);
+			});
+		}
 	});
 	
 	// Create or Delete users table
@@ -83,28 +86,30 @@ $(document).ready(function(){
 			return false;
 		}
 
-		updateUserObj = {
-
+		var updateUserObj = {
 			userID 		: formObject.find('.userList').children('option:selected').val(),
-			newUsername : ( formObject.find('.newUsername').val().length == 0 ) ? formObject.find('.userList').children('option:selected').text() : formObject.find('.newUsername').val(),
-			newPassword : formObject.find('.newPassword').val()
+			username	: ( formObject.find('.newUsername').val().length == 0 ) ? formObject.find('.userList').children('option:selected').text() : formObject.find('.newUsername').val(),
+			password	: formObject.find('.newPassword').val()
 		};
+		
+		console.table(updateUserObj)
 
 		$.post($(this).attr('action'), updateUserObj, function (response){
 
+			var parseResponse = $.parseJSON(response);
+				
 			if ( response.indexOf('success') > -1 ) {
 				
 				var userID = formObject.find('.userList').children('option:selected').attr('value');
 
 				$('.userList').find('option').each(function (){
 
-					if ( $(this).attr('value') == userID ) {
-
-						$(this).html(updateUserObj.newUsername);
+					if ( $(this).attr('value') == userID && updateUserObj.username != '') {
+						$(this).html(updateUserObj.username);
 					}
 				})
 			}
-			formObject.parents('.updateUser').find('.feedback').html(response);
+			formObject.parents('.updateUser').find('.feedback').html(objectToText(parseResponse));
 		})
 	})
 
