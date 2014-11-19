@@ -91,8 +91,6 @@ $(document).ready(function(){
 			username	: ( formObject.find('.newUsername').val().length == 0 ) ? formObject.find('.userList').children('option:selected').text() : formObject.find('.newUsername').val(),
 			password	: formObject.find('.newPassword').val()
 		};
-		
-		console.table(updateUserObj)
 
 		$.post($(this).attr('action'), updateUserObj, function (response){
 
