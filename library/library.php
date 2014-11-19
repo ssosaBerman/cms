@@ -130,9 +130,9 @@
 		// change user variables and row in DB
 		public function update($userID, $newName, $newPassword){
 
-			$userUpdateError = $this->validateUser(true, $newName, $newPassword);
+			$userUpdateError = $this->validateUser(false, $newName, $newPassword);
 
-			if ( is_array($userUpdateError) == false || $userUpdateError == false ) {
+			if ( $userUpdateError == false && is_array($userUpdateError) == false ) {
 				
 				$connection = $this->databaseConnect();
 
@@ -157,7 +157,7 @@
 				return $connection->error;
 			} else {
 
-				return $userUpdateError;
+				return ( is_array($userUpdateError) ) ? $userUpdateError : false;
 			}
 		}
 
@@ -269,7 +269,6 @@
 				}
 
 				$validUser = false;
-				
 				if ( $userID !== null) {
 
 					foreach ( $userList as $value ) {

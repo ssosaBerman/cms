@@ -11,7 +11,7 @@
 	
 	if ( $updateUserUpdater !== true ) {
 		
-		echo json_encode($updateUserUpdater);
+		echo ( is_array($updateUserUpdater) ) ? json_encode($updateUserUpdater) : json_encode('User Exist');
 	} else {
 
 		echo json_encode("success");
