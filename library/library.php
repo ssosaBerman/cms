@@ -86,6 +86,8 @@
 			
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
 
+			// if false, username not taken
+			// if array provided info invalid
 			if ( $userCreateError == false && is_array($userCreateError) == false ) {
 				
 				$connection = $this->databaseConnect();
@@ -130,17 +132,17 @@
 
 			$userUpdateError = $this->validateUser(false, $newName, $newPassword);
 
+			// if false, username not taken
+			// if array provided info invalid
 			if ( $userUpdateError == false && is_array($userUpdateError) == false ) {
 				
 				$connection = $this->databaseConnect();
 
 				if ( $queryUpdateUser = $connection->prepare("UPDATE `users` SET `username` = ?, `password` = ? WHERE ID = ?") ) {
-					
 					$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
 					
 					$escapedUsername = $this->requestEscape($newName, $connection);
 					$hashPassword    = $this->makePassword( $this->requestEscape($newPassword, $connection) );
-					
 					
 					if ( $userUpdated = $queryUpdateUser->execute() ){
 						
@@ -154,6 +156,7 @@
 				return $connection->error;
 			} else {
 
+				//username is taken $userUpdateError provides false true 
 				return ( is_array($userUpdateError) ) ? $userUpdateError : false;
 			}
 		}
@@ -232,13 +235,12 @@
 
 			$isValid = GUMP::is_valid($validateData, $validateRules);
 			if ( $isValid === true ) {
-
-				$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
-				
+	
 				$userList = $this->listRows();
 
 				$connection = $this->databaseConnect();
-				
+
+				//check if provided username exist in Database return ID
 				if ( $queryFindUser = $connection->prepare("SELECT `ID` FROM `users` WHERE `username` = ?") ) {
 					$queryFindUser->bind_param('s', $requestedUsername);
 					
@@ -253,11 +255,14 @@
 
 				$validUser = false;
 				if ( $userID !== null) {
-
+					
+					$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
+					// loop through existing users
 					foreach ( $userList as $value ) {
 
 						if ( $validatePassword == false ) {
-
+							// if username and ID match, means user is updating password not username
+							// if not match is username is taken by a different user
 							if ( $value['username'] == $requestedUsername && $value['ID'] == $userID ) {
 
 								$validUser = true;
