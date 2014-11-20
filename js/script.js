@@ -70,8 +70,7 @@ $(document).ready(function(){
 			password : formObject.find('.password').val()
 		}
 
-		$.post($(this).attr('action'), newUserObj ).done(function (response){
-				
+		$.post($(this).attr('action'), newUserObj, function (response){
 			if ( isNaN(response) ) {// registration fail
 				
 				var parseResponse = $.parseJSON(response);
