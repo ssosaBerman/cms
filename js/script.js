@@ -17,10 +17,24 @@ $(document).ready(function(){
 			});
 		}
 	});
+
+	/*$.get('/handler/listUsers.php').done(function (data){
+		
+		var parseArray = JSON.parse(data);
+
+		if ( typeof parseArray == 'object') {
+
+			$.each(parseArray, function (userIndex, userValue){
+				
+				var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
+
+				$('.userList').append(option);
+			});
+		}
+	});*/
 	
 	// Create or Delete users table
 	$('.usersTableInstaller').find('form').on('submit', function (e){		
-		
 		e.preventDefault();
 		
 		var formObject = $(this);
@@ -45,7 +59,6 @@ $(document).ready(function(){
 
 	// Adds user info to users table
 	$('.registerUser').find('form').on('submit', function (e){
-		
 		e.preventDefault();
 		
 		var formObject = $(this);
@@ -57,8 +70,8 @@ $(document).ready(function(){
 			password : formObject.find('.password').val()
 		}
 
-		$.post($(this).attr('action'), newUserObj, function (response){
-
+		$.post($(this).attr('action'), newUserObj ).done(function (response){
+				
 			if ( isNaN(response) ) {// registration fail
 				
 				var parseResponse = $.parseJSON(response);
@@ -151,7 +164,6 @@ $(document).ready(function(){
 
 	// Adds user info to users table
 	$('.loginuser').find('form').on('submit', function (e){
-		
 		e.preventDefault();
 		
 		var formObject = $(this);

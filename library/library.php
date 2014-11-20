@@ -85,7 +85,7 @@
 		public function create($requestedUsername, $requestedPassword){
 			
 			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
-			
+
 			if ( $userCreateError == false && is_array($userCreateError) == false ) {
 				
 				$connection = $this->databaseConnect();
@@ -168,9 +168,7 @@
 
 				if ( $userDeleted = $queryDeleteUser->execute() ) {
 					
-					unset($this->username);
-					unset($this->password);
-					unset($this->ID);
+					unset($this->username, $this->password, $this->ID);
 					
 					return true;
 				}
@@ -221,18 +219,19 @@
 		public function validateUser($validatePassword, $requestedUsername, $requestedPassword = ''){
 				
 			$validateData = array(
-				'username' => $requestedUsername, 
+				'username' => $requestedUsername,
 				'password' => $requestedPassword,
 			);
 			
-			$validateRules = array( 'username' => 'required|valid_email' );
+			$validateRules = array( 'username' => 'required|valid_email', );
 			
 			if ( $validatePassword == '' || $validatePassword == true ) {
 				
 				$validateRules['password'] = 'required|alpha_and_numeric|max_len,100|min_len,6';
 			}
-			
-			if ( $isValid = GUMP::is_valid($validateData, $validateRules) == true ) {
+
+			$isValid = GUMP::is_valid($validateData, $validateRules);
+			if ( $isValid === true ) {
 
 				$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
 				
@@ -241,12 +240,12 @@
 				$connection = $this->databaseConnect();
 				
 				if ( $queryFindUser = $connection->prepare("SELECT `ID` FROM `users` WHERE `username` = ?") ) {
-
 					$queryFindUser->bind_param('s', $requestedUsername);
 					
 					$queryFindUser->execute();
 					$queryFindUser->bind_result($userID);
 					$queryFindUser->fetch();
+
 				} else {
 
 					return $connection->error;
