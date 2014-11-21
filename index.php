@@ -1,28 +1,32 @@
 <?php
-	ini_set('display_errors', 1);
-	
+	ini_set('display_errors', 1);	
 	error_reporting(E_ALL);
 ?>
 <html>
 	<head>
-	<style>
-		*{
-			font-family: Arial, Helvetica, Sans-Serif;
-		}
+		<style>
+			*{
+				font-family: Arial, Helvetica, Sans-Serif;
+			}
 
-		input, select{
-			display: block;
-		}
+			input, select{
+				display: block;
+			}
 
-		div{
-			border: 1px solid #000;
-			margin-bottom: 5px;
-		}
-	</style>
+			div{
+				border: 1px solid #000;
+				margin-bottom: 5px;
+			}
+		</style>
 		<script src="/js/libraries/jquery/jquery.min.js"></script>
 		<script src="/js/script.js"></script>
 	</head>
 	<body>
+		<div class="currentUser">
+			<form action="" class="formLogout">
+				Not logged-in
+			</form>
+		</div>
 		<div class="usersTableInstaller">
 			<h3>Install / Uninstall table</h3>
 			<form action="/handler/install.php" class="formInstall">
@@ -54,9 +58,6 @@
 					  <option value="" disabled selected>Pick User</option>
 				</select>
 				
-				<label for="username">New username</label>
-				<input type="text" name="newUsername" class="newUsername" />
-				
 				<label for="password">New Password</label>
 				<input type="password" name="newPassword" class="newPassword" />
 				
@@ -77,7 +78,7 @@
 		</div>
 		<div class="loginUser">
 			<h3>Login</h3>
-			<form action="/handler/validateUser.php" class="formloginUser">
+			<form action="/handler/userLogin.php" class="formloginUser">
 				<label for="username">Username</label>
 				<input type="text" name="username" class="username" />
 				

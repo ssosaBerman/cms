@@ -11,7 +11,7 @@
 
 	if( is_array($validUser) == false && $validUser ) {
 		
-		echo "ok";
+		echo $_POST['username'];
 	} else {
 
 		echo 'Not found';

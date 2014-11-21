@@ -56,9 +56,9 @@
 			if ( $queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99) )") ) {
 				$tableUsersCreated = $queryCreateUserTable->execute();
 
-				if ( $tableUsersCreated === true ) {
+				if ( $tableUsersCreated === TRUE ) {
 					
-					return true;
+					return TRUE;
 				}
 			}
 
@@ -72,9 +72,9 @@
 			if ( $queryUnInstalTable = $connection->prepare("DROP TABLE users;") ) {
 				$tableUsersDeleted = $queryUnInstalTable->execute();
 
-				if ( $tableUsersDeleted == true) {
+				if ( $tableUsersDeleted == TRUE) {
 
-					return true;
+					return TRUE;
 				}
 			}
 
@@ -84,11 +84,11 @@
 		// Create new user with requested username and password, return user ID
 		public function create($requestedUsername, $requestedPassword){
 			
-			$userCreateError = $this->validateUser(false, $requestedUsername, $requestedPassword);
+			$userCreateError = $this->validateUser(FALSE, $requestedUsername, $requestedPassword);
 
-			// if false, username not taken
+			// if FALSE, username not taken
 			// if array provided info invalid
-			if ( $userCreateError == false && is_array($userCreateError) == false ) {
+			if ( $userCreateError == FALSE && is_array($userCreateError) == FALSE ) {
 				
 				$connection = $this->databaseConnect();
 
@@ -97,7 +97,9 @@
 					$queryAddUser->bind_param('ss', $escapedUsername, $hashPassword);
 
 					$escapedUsername = $this->requestEscape($requestedUsername, $connection);
-					$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword, $connection) );
+					
+					$hasher = new PasswordHash(8, TRUE);
+					$hashPassword = $hasher->HashPassword($requestedPassword);
 
 					if ( $queryAddUser->execute() ) {
 
@@ -130,11 +132,11 @@
 		// change user variables and row in DB
 		public function update($userID, $newName, $newPassword){
 
-			$userUpdateError = $this->validateUser(false, $newName, $newPassword);
+			$userUpdateError = $this->validateUser(FALSE, $newName, $newPassword);
 
-			// if false, username not taken
+			// if FALSE, username not taken
 			// if array provided info invalid
-			if ( $userUpdateError == false && is_array($userUpdateError) == false ) {
+			if ( $userUpdateError == TRUE && is_array($userUpdateError) == FALSE ) {
 				
 				$connection = $this->databaseConnect();
 
@@ -142,22 +144,24 @@
 					$queryUpdateUser->bind_param('ssi', $escapedUsername, $hashPassword, $userID);
 					
 					$escapedUsername = $this->requestEscape($newName, $connection);
-					$hashPassword    = $this->makePassword( $this->requestEscape($newPassword, $connection) );
+					
+					$hasher = new PasswordHash(8, TRUE);
+					$hashPassword = $hasher->HashPassword($newPassword);
 					
 					if ( $userUpdated = $queryUpdateUser->execute() ){
 						
 						$this->username = $newName;
 						$this->password = $newPassword;
 
-						return true;
+						return TRUE;
 					}
 				}
 
 				return $connection->error;
 			} else {
 
-				//username is taken $userUpdateError provides false true 
-				return ( is_array($userUpdateError) ) ? $userUpdateError : false;
+				//username is taken $userUpdateError provides FALSE TRUE 
+				return ( is_array($userUpdateError) ) ? $userUpdateError : FALSE;
 			}
 		}
 
@@ -173,7 +177,7 @@
 					
 					unset($this->username, $this->password, $this->ID);
 					
-					return true;
+					return TRUE;
 				}
 			}
 				
@@ -199,7 +203,7 @@
 							'ID'       => $ID,
 							'username' => $username,
 							'password' => $password,
-							);
+						);
 						
 						$rowArray[] = $rowFields;
 					}
@@ -228,74 +232,48 @@
 			
 			$validateRules = array( 'username' => 'required|valid_email', );
 			
-			if ( $validatePassword == '' || $validatePassword == true ) {
+			if ( $validatePassword == '' || $validatePassword == TRUE ) {
 				
 				$validateRules['password'] = 'required|alpha_and_numeric|max_len,100|min_len,6';
+
+				$hasher = new PasswordHash(8, TRUE);
+				$hashPassword =	$hasher->HashPassword($requestedPassword);
 			}
 
 			$isValid = GUMP::is_valid($validateData, $validateRules);
-			if ( $isValid === true ) {
+			if ( $isValid === TRUE ) {
 	
 				$userList = $this->listRows();
 
-				$connection = $this->databaseConnect();
-
-				//check if provided username exist in Database return ID
-				if ( $queryFindUser = $connection->prepare("SELECT `ID` FROM `users` WHERE `username` = ?") ) {
-					$queryFindUser->bind_param('s', $requestedUsername);
-					
-					$queryFindUser->execute();
-					$queryFindUser->bind_result($userID);
-					$queryFindUser->fetch();
-
-				} else {
-
-					return $connection->error;
-				}
-
-				$validUser = false;
+				$validUser = FALSE;
 				if ( $userID !== null) {
-					
-					$hashPassword = $this->makePassword( $this->requestEscape($requestedPassword) );
+
 					// loop through existing users
 					foreach ( $userList as $value ) {
 
-						if ( $validatePassword == false ) {
+						if ( $validatePassword == FALSE ) {
+							
 							// if username and ID match, means user is updating password not username
 							// if not match is username is taken by a different user
-							if ( $value['username'] == $requestedUsername && $value['ID'] == $userID ) {
+							if ( $value['username'] == $requestedUsername ) {
 
-								$validUser = true;
+								$validUser = TRUE;
 							}
 						} else {
 
-							if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword && $value['ID'] == $userID ) {
+							if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword ) {
 
-								$validUser = true;
+								$validUser = TRUE;
 							}
 						}
 					}
 				}
-				// return true if provided user and/or password match else return false
+				// return TRUE if provided user and/or password match else return FALSE
 				return $validUser; 
 			}
 
 			//return error array
 			return $isValid; 
-		}
-
-		private function makePassword($passwordRequest) {
-
-			// Base-2 logarithm of the iteration count used for password stretching
-			$hash_cost_log2 = 8;
-			// Do we require the hashes to be portable to older systems (less secure)?
-			$hash_portable = true;
-
-			$hasher = new PasswordHash($hash_cost_log2, $hash_portable);
-
-			$hash = $hasher->HashPassword($passwordRequest);
-
-			return $hash;
 		}
 	}
 ?>

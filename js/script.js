@@ -1,5 +1,6 @@
+console.log();
 var debug0;
-// console.log()
+
 $(document).ready(function(){
 
 	// append users to drop down
@@ -17,21 +18,6 @@ $(document).ready(function(){
 			});
 		}
 	});
-
-	/*$.get('/handler/listUsers.php').done(function (data){
-		
-		var parseArray = JSON.parse(data);
-
-		if ( typeof parseArray == 'object') {
-
-			$.each(parseArray, function (userIndex, userValue){
-				
-				var option = $('<option/>').attr('value', userValue.ID).html(userValue.username);
-
-				$('.userList').append(option);
-			});
-		}
-	});*/
 	
 	// Create or Delete users table
 	$('.usersTableInstaller').find('form').on('submit', function (e){		
@@ -101,7 +87,7 @@ $(document).ready(function(){
 
 		var updateUserObj = {
 			userID 		: formObject.find('.userList').children('option:selected').val(),
-			username	: ( formObject.find('.newUsername').val().length == 0 ) ? formObject.find('.userList').children('option:selected').text() : formObject.find('.newUsername').val(),
+			username	: formObject.find('.userList').children('option:selected').text(),
 			password	: formObject.find('.newPassword').val()
 		};
 
@@ -176,8 +162,29 @@ $(document).ready(function(){
 
 		$.post($(this).attr('action'), userObj, function (response){
 			
-			formObject.parents('.loginUser').find('.feedback').html(response);
+			if ( response.indexOf('Not found') > -1 ) {
+			
+				formObject.parents('.loginUser').find('.feedback').html(response);	
+			} else {
+
+				var logoutButton = $('<input/>').attr({
+					'type': 'submit',
+					'value': 'Logout'
+				});
+
+				formObject.parents('.loginUser').find('.feedback').html('ok');	
+				
+				$('.currentUser').find('form').html(response).append(logoutButton);
+			}
 		});
+	});
+
+	$('.currentUser').find('form').on('submit', function (e){
+		e.preventDefault();
+
+		var formObject = $(this);
+
+		formObject.html('Not logged-in');
 	});
 });
 
