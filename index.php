@@ -8,6 +8,11 @@
 			*{
 				font-family: Arial, Helvetica, Sans-Serif;
 			}
+			
+			body{
+				width: 50%;
+				margin: 1% auto;
+			}
 
 			input, select{
 				display: block;
@@ -15,7 +20,8 @@
 
 			div{
 				border: 1px solid #000;
-				margin-bottom: 5px;
+				margin-bottom: 1px;
+				padding: 5px;
 			}
 		</style>
 		<script src="/js/libraries/jquery/jquery.min.js"></script>

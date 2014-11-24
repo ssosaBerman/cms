@@ -246,28 +246,26 @@
 				$userList = $this->listRows();
 
 				$validUser = FALSE;
-				if ( $userID !== null) {
+				// loop through existing users
+				foreach ( $userList as $value ) {
 
-					// loop through existing users
-					foreach ( $userList as $value ) {
+					if ( $validatePassword == FALSE ) {
+						
+						// if username and ID match, means user is updating password not username
+						// if not match is username is taken by a different user
+						if ( $value['username'] == $requestedUsername ) {
 
-						if ( $validatePassword == FALSE ) {
-							
-							// if username and ID match, means user is updating password not username
-							// if not match is username is taken by a different user
-							if ( $value['username'] == $requestedUsername ) {
+							$validUser = TRUE;
+						}
+					} else {
 
-								$validUser = TRUE;
-							}
-						} else {
+						if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword ) {
 
-							if ( $value['username'] == $requestedUsername && $value['password'] == $hashPassword ) {
-
-								$validUser = TRUE;
-							}
+							$validUser = TRUE;
 						}
 					}
 				}
+				
 				// return TRUE if provided user and/or password match else return FALSE
 				return $validUser; 
 			}
