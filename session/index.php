@@ -1,85 +1,119 @@
+<!DOCTYPE html>
+<html>
 <?php
 	ini_set('display_errors', 1);
 	error_reporting(E_ALL);
-
-	if ( isset($_COOKIE['active_user']) ) {
 		
-		session_name('current_user');
-		session_id($_COOKIE['active_user']);
-		session_start();
+	$activeSession = ( isset($_COOKIE['sessionID']) );
+
+	if ( $activeSession ) {	
+
+		$file = fopen('/var/www/html/session/users.txt', 'c+');
+		$usersArray = fgets($file);
+		fclose($file);
+		$usersArray = json_decode($usersArray, true);
+		
+		foreach ($usersArray as $userInfo) {
+
+			if ( isset($userInfo['sessionID']) ) {
+				 
+				if ( $userInfo['sessionID'] == $_COOKIE['sessionID'] ) {
+					
+					session_name('activeSession');
+					session_id($_COOKIE['sessionID']);
+					session_start();
+					$usersArray = $userInfo;
+				}
+			} 
+		}
 	}
-	// if ( file_exists('/var/www/html/session/current_user.txt') ) {
-
-	// 	$file = fopen('/var/www/html/session/current_user.txt', 'c+');
-	// 	$savedSession = fgets($file);
-	// 	fclose($file);
-
-	// 	if ( $savedSession == $_COOKIE['active_user']) {
-			
-	// 		session_name('current_user');
-	// 		session_id($savedSession);
-	// 		session_start();
-	// 	}
-	// }
 ?>
-
-<!DOCTYPE html>
-<html>
 <head>
 	<script src="/js/libraries/jquery/jquery.min.js"></script>
+	<script src="/js/libraries/jquery.cookie/jquery.cookie.js"></script>
 	<script>
-	$(document).ready(function(){
-		$('form').on('submit', function (e) {
-			e.preventDefault();
+		$(document).ready(function(){
 
-			formObj = $(this);
-			
-			postobj = {
-				username : formObj.find('.username').val(),
-				password : formObj.find('.password').val()
-			};
-			
-			$.post(formObj.attr('action'), postobj, function(data){
+			$('form').on('submit', function (e) {
+				e.preventDefault();
 
-				formattedData = $.parseJSON(data)
+				formObj = $(this);
 				
-				$('.feedback').html(objectToText(formattedData))
+				postobj = {
+					username 	: formObj.find('.username').val(),
+					password 	: formObj.find('.password').val(),
+				};
+				
+				$.post(formObj.attr('action'), postobj, function(data){
 
-				formObj.remove();
+					formattedData = $.parseJSON(data)
+
+					if ( typeof formattedData == 'object' ) {
+						
+						$('.feedback').html(objectToText(formattedData));
+
+						if ( $('.rememberMe:checked').size() == 1 ) {
+
+							$.cookie('sessionID', $.cookie('activeSession'), {expires: 7});
+						} else {
+
+							$.cookie('sessionID', $.cookie('activeSession'));
+						};
+
+						formObj.remove();
+					} else {
+
+						$('.feedback').html(formattedData);
+					};
+				})
+			})
+
+			$('.clear').on('click', function(e){
+				e.preventDefault();
+
+				$.post('sessionStop.php', { sessionID: $.cookie('sessionID') }, function(response){
+					
+					$.removeCookie('sessionID');
+					// $.removeCookie('activeSession');
+
+					// var parseResponse = $.parseJSON(response)
+
+					$('.feedback').html(response);
+				})
 			})
 		})
-	})
 
-	function objectToText (theObject) {
+		function objectToText (theObject) {
 
-		return "<pre>" + JSON.stringify(theObject, null, 4) + "</pre>";
-	}
+			return "<pre>" + JSON.stringify(theObject, null, 4) + "</pre>";
+		}
 	</script>
 </head>
 <body>
-	<?php 
-	if (isset($_SESSION)): ?>
-	
+	<?php if ( $activeSession ): ?>
+	<input type="button" class="clear" value="log out">
+	<br />
 	<pre>
-	<?php 
-		print_r($_SESSION);
-		print_r($_COOKIE);
-	?>
+	<?php print_r($usersArray); ?>
 	</pre>
 	
 	<?php else: ?>
 	
-	<form action="demo_session1.php" method="post">
+	<form action="sessionStart.php" method="post">
 		<label for="username">username</label>
 		<input type="text" name="username" class="username"/>
-		<br>
+		<br />
 		<label for="username">password</label>
 		<input type="password" name="password" class="password"/>
-		<br>
+		<br />
+		<span>Remember Me</span>
+		<input type="checkbox" class='rememberMe' />
+		<br />
 		<input type="submit" />
 	</form>
 	
 	<?php endif ?>
+
 	<div class="feedback"></div>
 </body>
 </html>
