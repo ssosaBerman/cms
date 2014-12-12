@@ -25,6 +25,7 @@
 			}
 		</style>
 		<script src="/js/libraries/jquery/jquery.min.js"></script>
+		<script src="/js/libraries/jquery.cookie/jquery.cookie.js"></script>
 		<script src="/js/script.js"></script>
 	</head>
 	<body>
@@ -90,6 +91,9 @@
 				
 				<label for="password">Password</label>
 				<input type="password" name="password" class="password" />
+				
+				<label for="rememberMe">Remember Me</label>
+				<input type="checkbox" class='rememberMe' name="rememberMe" />
 				
 				<input type="submit" value="Login" />
 			</form>

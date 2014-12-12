@@ -1,7 +1,6 @@
 <?php
 	session_name('activeSession');
 	session_id($_POST['sessionID']);
-	
 	session_start();
 
 	if (ini_get("session.use_cookies")) {
@@ -12,10 +11,8 @@
 	}
 	
 	session_destroy();
-	$file = fopen('/var/www/html/session/users.txt', 'c+');
-	$usersArray = fgets($file);
-	$usersArray = json_decode($usersArray, true);
-	fclose($file);
+	$userData = file_get_contents('/var/www/html/session/users.txt');
+	$usersArray = json_decode($userData, true);
 
 	foreach ($usersArray as $userKey => $userValue) {
 
@@ -24,7 +21,6 @@
 			unset($usersArray[$userKey]['sessionID']);
 
 			$file = fopen('/var/www/html/session/users.txt', 'w+');
-
 			fwrite($file, json_encode($usersArray));
 			fclose($file);
 

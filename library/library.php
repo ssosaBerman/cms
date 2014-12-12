@@ -53,7 +53,7 @@
 
 			$connection =  $this->databaseConnect();
 
-			if ( $queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99) )") ) {
+			if ( $queryCreateUserTable = $connection->prepare("CREATE TABLE users (ID Integer PRIMARY KEY NOT NULL AUTO_INCREMENT, username CHAR(99), password CHAR(99), sessionID TEXT )") ) {
 				$tableUsersCreated = $queryCreateUserTable->execute();
 
 				if ( $tableUsersCreated === TRUE ) {
@@ -193,16 +193,17 @@
 				
 				if ( $rowList = $queryListRows->execute() ) {
 
-					$queryListRows->bind_result($ID, $username, $password);
+					$queryListRows->bind_result($ID, $username, $password, $sessionID);
 
 					$rowArray = array();
 					
 					while ( $queryListRows->fetch() ) {
 						
 						$rowFields = array(
-							'ID'       => $ID,
-							'username' => $username,
-							'password' => $password,
+							'ID'		=> $ID,
+							'username'	=> $username,
+							'password'	=> $password,
+							'sessionID'	=> $sessionID,
 						);
 						
 						$rowArray[] = $rowFields;
@@ -272,6 +273,74 @@
 
 			//return error array
 			return $isValid; 
+		}
+
+		public function setSession ($requestedUsername = NULL) {
+
+			$hasher = new PasswordHash(8, TRUE);
+
+			$userList = $this->listRows();
+			
+			foreach ($userList as $userInfo) {
+				
+				if ( isset($_COOKIE['sessionID']) ) {
+					
+					$sessionIDhash = $hasher->HashPassword($_COOKIE['sessionID']);
+
+					if ( $sessionIDhash == $userInfo['sessionID'] ) {
+						
+						session_name('activeSession');
+						session_id($_COOKIE['sessionID']);
+						session_start();
+
+						return $userInfo;
+					}
+				}
+
+				if ( $requestedUsername == $userInfo['username'] && $requestedUsername !== NULL) {
+					
+					session_name('activeSession');
+					session_start();
+					
+					$sessionIDhash = $hasher->HashPassword(session_id());
+
+					$connection = $this->databaseConnect();
+
+					if ( $querySaveSessionID = $connection->prepare("UPDATE `users` SET `sessionID` = ? WHERE ID = ?") ) {
+						$querySaveSessionID->bind_param('si', $sessionIDhash, $userInfo['ID']);
+						
+						if ( $sessionSaved = $querySaveSessionID->execute() ) {
+							
+							return $sessionIDhash;
+						}
+					}
+
+					return $connection->error;
+				}
+			}
+			
+			return FALSE;
+		}
+
+		public function destroySession ($sessionID) {
+
+			session_name('activeSession');
+			session_id($sessionID);
+			session_start();
+
+			if ( ini_get("session.use_cookies") ) {
+
+				$params = session_get_cookie_params();
+
+				setcookie(session_name(), '', time() - 42000, $params["path"], $params["domain"], $params["secure"], $params["httponly"]);
+
+				if ( session_destroy() ) {
+					
+					return TRUE;
+				}
+			}
+
+			return FALSE;
 		}
 	}
 ?>

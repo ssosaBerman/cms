@@ -7,11 +7,16 @@
 
 	$validateUser = new User();
 
-	$validUser = $validateUser->validateUser(true, $_POST['username'], $_POST['password']);
+	$validUser = $validateUser->validateUser(TRUE, $_POST['username'], $_POST['password']);
 
-	if( is_array($validUser) == false && $validUser ) {
+	if( is_array($validUser) == FALSE && $validUser ) {
 		
-		echo $_POST['username'];
+		$sessionID = $validateUser->setSession($_POST['username']);
+
+		if ( $sessionID !== FALSE ) {
+			
+			echo $sessionID;
+		}
 	} else {
 
 		echo 'Not found';

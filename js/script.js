@@ -2,6 +2,17 @@ console.log();
 var debug0;
 
 $(document).ready(function(){
+	
+	//check if for active sessions
+	if ( $.cookie('sessionID') !== undefined ) {
+		
+		$.get('/handler/resumeSession.php', function (user){
+
+			var parseUserData = $.parseJSON(user);
+
+			displayUser(parseUserData['username'])
+		})
+	};
 
 	// append users to drop down
 	$.get('/handler/listUsers.php', function (data){
@@ -166,15 +177,17 @@ $(document).ready(function(){
 			
 				formObject.parents('.loginUser').find('.feedback').html(response);	
 			} else {
+				
+				if ( formObject.find('.rememberMe:checked').size() == 1 ) {
 
-				var logoutButton = $('<input/>').attr({
-					'type': 'submit',
-					'value': 'Logout'
-				});
+					$.cookie('sessionID', $.cookie('activeSession'), {expires: 365});
+				} else {
+
+					$.cookie('sessionID', $.cookie('activeSession'));
+				};
 
 				formObject.parents('.loginUser').find('.feedback').html('ok');	
-				
-				$('.currentUser').find('form').html(response).append(logoutButton);
+				displayUser(formObject.find('.username').val())
 			}
 		});
 	});
@@ -184,11 +197,32 @@ $(document).ready(function(){
 
 		var formObject = $(this);
 
-		formObject.html('Not logged-in');
+		$.get('handler/logout.php', function(response){
+			
+			if ( response == 'ok' ) {
+
+				formObject.html('Not logged-in');
+
+				$.removeCookie('sessionID');
+			};
+		})
+
 	});
 });
 
 function objectToText (theObject) {
 
 	return "<pre>" + JSON.stringify(theObject, null, 4) + "</pre>";
+}
+
+function displayUser (username) {
+
+	var logoutButton = $('<input/>').attr({
+		'type': 'submit',
+		'value': 'Logout'
+	});
+
+	$('.currentUser').find('form')
+	.html(username)
+	.append(logoutButton);
 }

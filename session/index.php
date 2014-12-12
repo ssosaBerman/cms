@@ -8,10 +8,8 @@
 
 	if ( $activeSession ) {	
 
-		$file = fopen('/var/www/html/session/users.txt', 'c+');
-		$usersArray = fgets($file);
-		fclose($file);
-		$usersArray = json_decode($usersArray, true);
+		$userData = file_get_contents('/var/www/html/session/users.txt');
+		$usersArray = json_decode($userData, true);
 		
 		foreach ($usersArray as $userInfo) {
 
